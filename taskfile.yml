@@ -1,0 +1,176 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Requires
+# - go
+# - grep
+# - pcre2grep
+# - protoc
+#   - grpc_python_plugin
+#   - protoc-gen-go
+#   - protoc-gen-go-grpc
+# - misspell
+# - gocyclo
+# - mktemp
+# - which
+# - ineffassign
+# - staticcheck
+# - gofmt
+# - curl
+# - addlicense (github.com/google/addlicense)
+
+version: 3
+
+tasks:
+
+# App tasks
+  print_types: 
+    desc: "Print supported types for pasting into docs"
+    aliases: ["types", "pt"]
+    cmds:
+      - go test -timeout 30s -run '^TestGetSupportedTypes$' -v -args -print_types | grep type= | awk -F= '{ print "  * `" $NF "`" }' | sort
+      
+  test:
+    desc: "Run unit tests"
+    aliases: ["t"]
+    sources:
+      - "*.go"
+    cmds:
+      - go test -timeout 30s {{.CLI_ARGS}} ./...
+      
+  clean:
+    desc: "Clean up the build artifacts and cache"
+    cmds:
+      - go clean -cache -testcache
+
+# Common tasks
+  check:
+    desc: "Run pre-build checks on files"
+    aliases: ["c", "checks"]
+    cmds:
+      - task: clean
+      - task: googlify
+      - go mod tidy
+      - task: fmt
+      - task: lint
+      - misspell ./...
+      - task: test
+      - task: clean
+      - find . -type f -not -name "*.sh" -exec chmod a-x {} \;
+
+  test-clean:
+    desc: "Clean test cache and run tests"
+    aliases: ["tc"]
+    cmds:
+      - task: clean
+      - task: test
+
+  lint:
+    desc: "Run linters"
+    sources:
+      - "**/*.go"
+    cmds:
+      - go vet ./...
+      - ineffassign ./...
+      - staticcheck ./...
+      - gocyclo -over 14 -ignore "\\.pb\\.go$" ./.
+
+  fmt:
+    desc: "Format the code"
+    sources:
+      - "**/*.go"
+    cmds:
+      - gofmt -s -w ./
+ 
+  license:
+    internal: true
+    status:
+      - test -f LICENSE
+    cmds:
+      - curl -o LICENSE https://raw.githubusercontent.com/google/new-project/master/LICENSE
+
+  contributing:
+    internal: true
+    status:
+      - test -f CONTRIBUTING.md
+    cmds:
+      - curl -o CONTRIBUTING.md https://raw.githubusercontent.com/google/new-project/master/docs/contributing.md
+
+  readme:
+    internal: true
+    status:
+      - test -f README.md
+    cmds:
+      - printf '# {{.APP_NAME}}\n\n{{.LICENSE}}\n{{.CONTRIBUTING}}\n{{.DISCLAIMER}}' >>README.md
+    vars:
+      APP_NAME:
+        sh: "basename $PWD"
+      LICENSE: >
+        ## License\n\nApache 2.0; see [`LICENSE`](LICENSE) for details.
+      CONTRIBUTING: >
+        ## Contributing\n\nSee [`CONTRIBUTING.md`](CONTRIBUTING.md) for details.
+      DISCLAIMER: >
+        ## Disclaimer\n\nThis project is not an official Google project. It is not supported by
+        Google and Google specifically disclaims all warranties as to its quality,
+        merchantability, or fitness for a particular purpose.\n
+
+  required_files:
+    desc: "Make sure required files exist"
+    aliases: ["rf"]
+    cmds:
+      - task: license
+      - task: contributing
+      - task: gitignore
+      - task: readme
+
+  license_headers:
+    desc: "Make sure source files have headers"
+    cmds:
+      - addlicense -check -ignore '**/.*' -ignore '.*/**' ./
+
+  add_license_headers:
+    desc: "Make sure source files have headers"
+    aliases: ["alh"]
+    preconditions:
+      - test "{{.CLI_ARGS}}" != ""
+    cmds:
+      - addlicense -ignore '**/.*' -ignore '.*/**' ./ {{.CLI_ARGS}}
+
+  check_readme_google:
+    desc: "Make sure README.md has common items"
+    sources:
+      - "README.md"
+    cmds:
+      - pcre2grep -M -q '# Contributing\s*See \[`CONTRIBUTING.md`\].' README.md
+      - pcre2grep -M -q "# Disclaimer\s*This project is not an official Google project." README.md
+      - pcre2grep -M -q '# License\s*Apache 2.0.' README.md
+
+  googlify:
+    desc: "Make sure google checks pass"
+    cmds:
+      - task: required_files
+      - task: check_readme_google
+      - task: license_headers 
+
+  gitignore:
+    desc: "Make sure .gitignore contains common items"
+    status:
+      - test -f ./.gitignore
+      - grep -E -q '^\.\*$' .gitignore
+      - grep -E -q '^\!/\.gitignore$' .gitignore
+    cmds:
+      - grep -E -q '^\.\*$' .gitignore || printf '.*\n' >>.gitignore
+      - grep -E -q '^\!/\.gitignore$' .gitignore || printf '!/.gitignore\n' >>.gitignore
+
+
