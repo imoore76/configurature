@@ -16,14 +16,8 @@
 # - go
 # - grep
 # - pcre2grep
-# - protoc
-#   - grpc_python_plugin
-#   - protoc-gen-go
-#   - protoc-gen-go-grpc
 # - misspell
 # - gocyclo
-# - mktemp
-# - which
 # - ineffassign
 # - staticcheck
 # - gofmt
