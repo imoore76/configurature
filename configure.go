@@ -55,6 +55,12 @@ type Options struct {
 // Configure will populate the supplied struct with options specified on the
 // command line or by environment variables prefixed by the specified envPrefix
 func Configure[T any](opts *Options) *T {
+	if opts == nil {
+		opts = &Options{
+			Args: os.Args[1:],
+		}
+	}
+
 	c := &configurer{
 		config: new(T),
 		opts:   opts,
