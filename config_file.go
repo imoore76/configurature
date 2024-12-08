@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+This file contains the ConfigFile type helpers
+*/
 package configurature
 
 import (
@@ -26,7 +29,7 @@ import (
 
 	"github.com/fatih/structtag"
 	"github.com/iancoleman/strcase"
-	flag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
 )
 
@@ -46,7 +49,7 @@ func (c *configurer) setConfigFile() {
 }
 
 // Load configuration from config file
-func (c *configurer) loadConfigFile(fs *flag.FlagSet) {
+func (c *configurer) loadConfigFile(fs *pflag.FlagSet) {
 	// Set from env since setFromEnv() has not been called yet
 	// (chicken and egg)
 	if envVal := os.Getenv(
@@ -57,7 +60,7 @@ func (c *configurer) loadConfigFile(fs *flag.FlagSet) {
 
 	// Set up a flagset that only contains the flags we are looking for to
 	// get the config file. Parse args to get the value.
-	f := flag.NewFlagSet("cf", flag.ContinueOnError)
+	f := pflag.NewFlagSet("cf", pflag.ContinueOnError)
 	f.Usage = func() {}
 	fileName := new(string)
 	f.StringVarP(fileName, c.configFile.Flag, c.configFile.Short, *c.configFile.Value, "")
@@ -103,8 +106,8 @@ func (c *configurer) loadConfigFile(fs *flag.FlagSet) {
 // Parameters:
 // - gMap: a pointer to a map[string]interface{}
 // - path: a slice of strings representing the path
-// - fs: a pointer to a flag.FlagSet
-func setFlagsFromGenericMap(gMap *map[string]interface{}, ancestors []string, fs *flag.FlagSet) {
+// - fs: a pointer to a pflag.FlagSet
+func setFlagsFromGenericMap(gMap *map[string]interface{}, ancestors []string, fs *pflag.FlagSet) {
 	for k, v := range *gMap {
 
 		// Yaml unmarshals into a map[interface{}]interface{} for

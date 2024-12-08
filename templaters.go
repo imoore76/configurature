@@ -21,7 +21,7 @@ import (
 
 	"github.com/fatih/structtag"
 	"github.com/iancoleman/strcase"
-	flag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
 )
 
@@ -37,9 +37,9 @@ var internalFlags = map[string]bool{
 //
 // Parameters:
 // - fs: the flag set containing the flag values
-func (c *configurer) printEnvTemplate(fs *flag.FlagSet) {
+func (c *configurer) printEnvTemplate(fs *pflag.FlagSet) {
 	fmt.Printf("# Generated with\n# %s\n\n", c.opts.Args)
-	fs.VisitAll(func(f *flag.Flag) {
+	fs.VisitAll(func(f *pflag.Flag) {
 		if _, ok := internalFlags[f.Name]; ok || f.Hidden {
 			return
 		}
@@ -54,7 +54,7 @@ func (c *configurer) printEnvTemplate(fs *flag.FlagSet) {
 //
 // Parameters:
 // - fs: the flag set containing the flag values
-func (c *configurer) printYamlTemplate(fs *flag.FlagSet) {
+func (c *configurer) printYamlTemplate(fs *pflag.FlagSet) {
 
 	fmt.Printf("# Generated with\n# %s\n\n", c.opts.Args)
 

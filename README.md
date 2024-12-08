@@ -41,7 +41,7 @@ Table of Contents
   * [Other](#other)
 - [Supported Types](#supported-types)
   * [Custom Types](#custom-types)
-    + [Map Vaule Types](#map-value-types)
+    + [Map Value Types](#map-value-types)
 - [License](#license)
 - [Contributing](#contributing)
 - [Disclaimer](#disclaimer)
@@ -760,7 +760,7 @@ As well as pointers to all of these types. See also: [Custom Types](#custom-type
 
 ### Custom Types
 
-A custom Cofigurature type specifies the type of struct field it is for, and how to interact with it by satisfying Configurature's `Value` interface.
+A custom Configurature type specifies the type of struct field it is for, and how to interact with it by satisfying Configurature's `Value` interface.
 
 ```go
 type Value interface {
