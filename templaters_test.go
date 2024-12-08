@@ -93,7 +93,7 @@ FOO_STRS="[1,2,3]"
 func TestPrintYamlTemplate(t *testing.T) {
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
 		co.Configure[YamlConf](&co.Options{
-			Args:              []string{"--print_yaml_template", "--st_ptr", "sonestring"},
+			Args:              []string{"--print_yaml_template", "--st_ptr", "some-string"},
 			NoRecover:         true,
 			ShowInternalFlags: true,
 		})
@@ -105,7 +105,7 @@ func TestPrintYamlTemplate(t *testing.T) {
 
 	assert.Equal("", stderr)
 	assert.Equal(`# Generated with
-# [--print_yaml_template --st_ptr sonestring]
+# [--print_yaml_template --st_ptr some-string]
 
 # a string
 str: yes"no
@@ -117,7 +117,7 @@ strs:
 - "3"
 
 # a string pointer
-st_ptr: sonestring
+st_ptr: some-string
 
 # an int
 int_1: 1
@@ -154,6 +154,6 @@ ips:
 		NoRecover: true,
 	})
 
-	assert.Equal("sonestring", *conf.StPtr)
+	assert.Equal("some-string", *conf.StPtr)
 	assert.Equal([]net.IP{net.ParseIP("127.0.0.1")}, *conf.Sub2.IPs)
 }

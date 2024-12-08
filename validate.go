@@ -26,7 +26,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	extras "github.com/go-playground/validator/v10/non-standard/validators"
 	en_tr "github.com/go-playground/validator/v10/translations/en"
-	flag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 )
 
 // getValidatorTranslator registers translations for v *validator.Validate object
@@ -119,7 +119,7 @@ func validateRegex(fl validator.FieldLevel) bool {
 }
 
 // validate configuration
-func (c *configurer) validate(s interface{}, fs *flag.FlagSet) {
+func (c *configurer) validate(s interface{}, fs *pflag.FlagSet) {
 
 	v := getDefaultValidator()
 	trans := getValidatorTranslator(v)
@@ -137,7 +137,7 @@ func (c *configurer) validate(s interface{}, fs *flag.FlagSet) {
 			v := fs.Lookup(fName).Value.String()
 			for _, e := range enums {
 				if v == e {
-					return false // false == dont stop looping over fields
+					return false // false == don't stop looping over fields
 				}
 			}
 			errors = append(errors, fmt.Sprintf("%s must be one of %s", fName, strings.Join(enums, ", ")))

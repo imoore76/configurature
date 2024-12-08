@@ -23,9 +23,10 @@ import (
 	"strings"
 	"testing"
 
-	co "github.com/imoore76/configurature"
-	flag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
+
+	co "github.com/imoore76/configurature"
 )
 
 /*
@@ -139,7 +140,7 @@ func TestCustomType_Flag(t *testing.T) {
 
 	conf := co.Configure[MyConfig](&co.Options{
 		Args:  []string{"--image=" + tmp.Name()},
-		Usage: func(_ *flag.FlagSet) {},
+		Usage: func(_ *pflag.FlagSet) {},
 	})
 
 	assert := assert.New(t)
@@ -152,7 +153,7 @@ func TestCustomType_Error(t *testing.T) {
 
 		co.Configure[MyConfig](&co.Options{
 			Args:  []string{"--image", "./go.mod"},
-			Usage: func(_ *flag.FlagSet) {},
+			Usage: func(_ *pflag.FlagSet) {},
 		})
 		os.Exit(0)
 	}
@@ -176,7 +177,7 @@ func TestCustomType_ErrorConfigFile(t *testing.T) {
 
 		co.Configure[MyConfig](&co.Options{
 			Args:  []string{"--conf", tmp.Name()},
-			Usage: func(_ *flag.FlagSet) {},
+			Usage: func(_ *pflag.FlagSet) {},
 		})
 		os.Exit(1)
 	}
@@ -205,7 +206,7 @@ func TestCustomSliceType_Flag(t *testing.T) {
 
 	conf := co.Configure[MyConfig](&co.Options{
 		Args:  []string{"--images", strings.Join(files, ",")},
-		Usage: func(_ *flag.FlagSet) {},
+		Usage: func(_ *pflag.FlagSet) {},
 	})
 
 	assert := assert.New(t)
@@ -218,7 +219,7 @@ func TestCustomSliceType_Error(t *testing.T) {
 
 		co.Configure[MyConfig](&co.Options{
 			Args:  []string{"--images", "./go.mod"},
-			Usage: func(_ *flag.FlagSet) {},
+			Usage: func(_ *pflag.FlagSet) {},
 		})
 		os.Exit(0)
 	}
@@ -252,7 +253,7 @@ func TestCustomSliceType_ConfigFile(t *testing.T) {
 
 	conf := co.Configure[MyConfig](&co.Options{
 		Args:  []string{"--conf", tmp.Name()},
-		Usage: func(_ *flag.FlagSet) {},
+		Usage: func(_ *pflag.FlagSet) {},
 	})
 
 	assert.Equal(t, expected, conf.Images)
@@ -268,7 +269,7 @@ func TestCustomSliceType_ErrorConfigFile(t *testing.T) {
 
 		co.Configure[MyConfig](&co.Options{
 			Args:  []string{"--conf", tmp.Name()},
-			Usage: func(_ *flag.FlagSet) {},
+			Usage: func(_ *pflag.FlagSet) {},
 		})
 		panic("Expected exit")
 	}
@@ -296,7 +297,7 @@ func TestMapValueType(t *testing.T) {
 
 	conf := co.Configure[CConf](&co.Options{
 		Args:  []string{"--background", "blue"},
-		Usage: func(_ *flag.FlagSet) {},
+		Usage: func(_ *pflag.FlagSet) {},
 	})
 
 	assert.Equal(t, conf.Background, Color("#0000ff"))
@@ -336,7 +337,7 @@ func TestMapValueType_BadValue(t *testing.T) {
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
 		co.Configure[CConf](&co.Options{
 			Args:  []string{"--background", "yellow"},
-			Usage: func(_ *flag.FlagSet) {},
+			Usage: func(_ *pflag.FlagSet) {},
 		})
 		panic("Should have exited")
 	}
