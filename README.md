@@ -221,7 +221,7 @@ See the [Validators](#validators) section for more info.
 
 ### Options
 
-`Configure[]()` expects an `Options` pointer as input.
+`Configure[]()` can be called with an `Options` pointer as input.
 
 ```go
 // Config options
@@ -232,6 +232,19 @@ type Options struct {
 	Usage             func(*flag.FlagSet) // Usage function called when configuration is incorrect or for --help
 	NoRecover         bool                // Don't recover from panic
 	ShowInternalFlags bool                // Show hidden internal flags
+}
+```
+
+If not specified, the defaults are:
+
+```go
+Options{
+    EnvPrefix:         "",
+    Args:              os.Args[1:],
+    NilPtrs:           false,
+    Usage:             // internally composed
+    NoRecover:         false,
+    ShowInternalFlags: false,
 }
 ```
 
