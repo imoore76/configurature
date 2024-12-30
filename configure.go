@@ -59,6 +59,8 @@ func Configure[T any](opts *Options) *T {
 		opts = &Options{
 			Args: os.Args[1:],
 		}
+	} else if opts.Args == nil {
+		opts.Args = os.Args[1:]
 	}
 
 	c := &configurer{

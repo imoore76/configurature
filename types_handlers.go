@@ -62,7 +62,7 @@ func init() {
 	}
 
 	// Add Configurature custom types
-	AddMapValueType[slog.Level]("", map[string]slog.Level{
+	AddMapValueType("", map[string]slog.Level{
 		"debug": slog.LevelDebug,
 		"info":  slog.LevelInfo,
 		"warn":  slog.LevelWarn,
@@ -88,8 +88,8 @@ func getSupportedTypes() []string {
 // to replace the behavior of existing types.
 //
 // Parameters:
-// structFieldType: The type of struct field
-// confValueT: *confValueT must implement the Value interface
+// - structFieldType: The type of struct field
+// - confValueT: *confValueT must implement the Value interface
 func AddType[structFieldType any, confValueT any]() {
 	rt := reflect.TypeFor[structFieldType]()
 
@@ -124,12 +124,13 @@ func AddType[structFieldType any, confValueT any]() {
 
 // addToFlagSet adds a flag to the provided FlagSet based on the given type.
 //
-// t: the reflect.Type of the flag
-// fs: the pointer to the pflag.FlagSet to add the flag to
-// name: the name of the flag
-// short: the short name of the flag
-// def: the default value of the flag
-// desc: the description of the flag
+// Parameters:
+// - t: the reflect.Type of the flag
+// - fs: the pointer to the pflag.FlagSet to add the flag to
+// - name: the name of the flag
+// - short: the short name of the flag
+// - def: the default value of the flag
+// - desc: the description of the flag
 func addToFlagSet(t reflect.Type, enumProvided bool, fs *pflag.FlagSet, name string, short string, def string, desc string) {
 
 	isPtr := t.Elem().Kind() == reflect.Ptr

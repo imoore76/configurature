@@ -131,7 +131,7 @@ tasks:
   license_headers:
     desc: "Make sure source files have headers"
     cmds:
-      - addlicense -check -ignore '**/.*' -ignore '.*/**' ./
+      - addlicense -check -ignore '**/.*' -ignore '.*/**' -ignore 'docs/build/**' ./
 
   add_license_headers:
     desc: "Make sure source files have headers"
