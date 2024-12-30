@@ -285,7 +285,7 @@ func TestCustomSliceType_ErrorConfigFile(t *testing.T) {
 func TestMapValueType(t *testing.T) {
 	type Color string
 
-	co.AddMapValueType[Color]("", map[string]Color{
+	co.AddMapValueType("", map[string]Color{
 		"red":   "#ff0000",
 		"blue":  "#0000ff",
 		"green": "#00ff00",
@@ -306,7 +306,7 @@ func TestMapValueType(t *testing.T) {
 func TestMapValueType_NoValue(t *testing.T) {
 	type Color string
 
-	co.AddMapValueType[Color]("", map[string]Color{
+	co.AddMapValueType("", map[string]Color{
 		"red":   "#ff0000",
 		"blue":  "#0000ff",
 		"green": "#00ff00",
@@ -324,7 +324,7 @@ func TestMapValueType_NoValue(t *testing.T) {
 func TestMapValueType_BadValue(t *testing.T) {
 	type Color string
 
-	co.AddMapValueType[Color]("", map[string]Color{
+	co.AddMapValueType("", map[string]Color{
 		"red":   "#ff0000",
 		"blue":  "#0000ff",
 		"green": "#00ff00",
@@ -354,7 +354,7 @@ func TestMapValueType_BadValue(t *testing.T) {
 func TestMapValueType_Usage(t *testing.T) {
 
 	type Color string
-	co.AddMapValueType[Color]("", map[string]Color{
+	co.AddMapValueType("", map[string]Color{
 		"red":   "#ff0000",
 		"blue":  "#0000ff",
 		"green": "#00ff00",
