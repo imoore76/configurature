@@ -12,7 +12,7 @@ Validators
 
 
 Validators are specified in a field tag as ``validate:"validator1,validator2"``.
-Some validators require an option and may be specified as ``validators:"validator1=foo,validator2=bar"``.
+Some validators require an option and may be specified as ``validate:"validator1=foo,validator2=bar"``.
 This functionality is provided by the excellent
 |validator_link| package.
 For more information, be sure to read |validator_docs|.
