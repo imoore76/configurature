@@ -39,10 +39,9 @@ var (
 
 // Value interface for config types
 type Value interface {
-	Interface() interface{} // Internal value as an interface{}
-	Set(string) error       // Set the internal value based on the string. If invalid, return error
-	String() string         // Internal value as a string
-	Type() string           // Type of the value. Appears in Usage() help
+	Set(string) error // Set the internal value based on the string. If invalid, return error
+	String() string   // Internal value as a string
+	Type() string     // Type of the value. Appears in Usage() help
 }
 
 func init() {
@@ -68,7 +67,7 @@ func init() {
 		"warn":  slog.LevelWarn,
 		"error": slog.LevelError,
 	})
-	AddType[ConfigFile, configFileValue]()
+	AddType[ConfigFile]()
 
 }
 
@@ -89,13 +88,12 @@ func getSupportedTypes() []string {
 //
 // Parameters:
 // - structFieldType: The type of struct field
-// - confValueT: *confValueT must implement the Value interface
-func AddType[structFieldType any, confValueT any]() {
+func AddType[structFieldType any]() {
 	rt := reflect.TypeFor[structFieldType]()
 
-	// Create a new var of type *confValueT and make sure it implements the
+	// Create a new var of type *structFieldType and make sure it implements the
 	// required Value interface
-	ptrType := new(confValueT)
+	ptrType := new(structFieldType)
 	if !reflect.TypeOf(ptrType).Implements(reflect.TypeFor[Value]()) {
 		panic(fmt.Sprintf("%T must implement Value", ptrType))
 	}
@@ -103,12 +101,15 @@ func AddType[structFieldType any, confValueT any]() {
 	// Add the value to the customFlagMap with a method that will add a flag
 	// of that type to the FlagSet
 	customFlagMap[rt] = func(name string, short string, def string, desc string, fs *pflag.FlagSet) {
-		l := new(confValueT)
+		l := new(structFieldType)
 		if def != "" {
 			// Use Set() to set the default value of the Value
-			reflect.ValueOf(l).MethodByName("Set").Call(
+			r := reflect.ValueOf(l).MethodByName("Set").Call(
 				[]reflect.Value{reflect.ValueOf(def)},
 			)
+			if !r[0].IsNil() {
+				panic(fmt.Sprintf("Error setting default value for field %s: %s", name, r[0]))
+			}
 		}
 		// Add the Value to the flagset using VarP
 		reflect.ValueOf(fs).MethodByName("VarP").Call(
@@ -196,18 +197,31 @@ func setNativeValue(rv reflect.Value, name string, fs *pflag.FlagSet) {
 	if isPtr && rv.Elem().IsNil() {
 		rv.Elem().Set(reflect.New(rv.Elem().Type().Elem()))
 	}
-	// For Configurature Values which have an Interface() method
-	if m := reflect.ValueOf(fv).MethodByName("Interface"); m.IsValid() {
-		vs := m.Call(nil)
+
+	// Type of the field value and destination
+	pfType := rv.Type().Elem()
+	dest := rv.Elem()
+	if isPtr {
+		pfType = pfType.Elem()
+		dest = dest.Elem()
+	}
+
+	// For Configurature MapValue types
+	if _, ok := mapValueTypeKeys[pfType.String()]; ok {
+		vs := reflect.ValueOf(fv).MethodByName("Interface").Call(nil)
 		if !vs[0].IsNil() {
-			if isPtr {
-				// Set pointer value
-				rv.Elem().Elem().Set(vs[0].Elem())
-			} else {
-				// Not pointer, just set value
-				rv.Elem().Set(vs[0].Elem())
-			}
+			dest.Set(vs[0].Elem())
 		}
+		return
+	}
+
+	// For Custom types
+	if _, ok := customFlagMap[pfType]; ok {
+		rv := reflect.ValueOf(fv)
+		if rv.Kind() == reflect.Ptr {
+			rv = rv.Elem()
+		}
+		dest.Set(rv)
 		return
 	}
 
@@ -219,10 +233,6 @@ func setNativeValue(rv reflect.Value, name string, fs *pflag.FlagSet) {
 	// This is for complex types such as GetIPSlice. This is brittle,
 	// but better than maintaining a static map
 	var m reflect.Value
-	pfType := rv.Type().Elem()
-	if isPtr {
-		pfType = pfType.Elem()
-	}
 	if method, ok := pfgFlagMap[pfType]; !ok {
 		panic("setNativeValue() unsupported type: " + rv.Type().Elem().String())
 	} else {

@@ -44,10 +44,6 @@ The following field types are supported
 As well as pointers to all of these types. Configurature also
 allows for adding `Custom Types <#custom-types>`__.
 
-.. raw:: html
-
-   <!-- TOC -->
-
 Custom Types
 -------------
 
@@ -62,7 +58,6 @@ interface.
         String() string
         Set(string) error
         Type() string
-        Interface() interface{}
     }
 
 You may be writing a custom type to configure a Go struct field type
@@ -82,19 +77,16 @@ certain image file types and file size limits.
         // go type to be set as config struct field types
         // type Config struct { FieldName ThumbnailFile `....` }
         ThumbnailFile string
-
-        // type for Value interface
-        thumbnailValue ThumbnailFile
     )
 
     // String value of type
-    func (t *thumbnailValue) String() string {
+    func (t *ThumbnailFile) String() string {
         return (string)(*t)
     }
 
     // Set is always called with a string and should return an error if the string
     // can not be converted to the underlying type
-    func (t *thumbnailValue) Set(v string) error {
+    func (t *ThumbnailFile) Set(v string) error {
 
         // This will fail if the file does not exist or there is any other error
         // accessing the file
@@ -110,25 +102,19 @@ certain image file types and file size limits.
         default:
             return fmt.Errorf("file type \"%s\" not supported", ext)
         }
-        *t = (thumbnailValue)(v)
+        *t = (ThumbnailFile)(v)
         return nil
     }
 
     // Name of the type
-    func (i *thumbnailValue) Type() string {
+    func (i *ThumbnailFile) Type() string {
         return "Thumbnail"
-    }
-
-    // Return the value of the type converted to its field value type
-    func (t *thumbnailValue) Interface() interface{} {
-        return ThumbnailFile(*t)
     }
 
     func init() {
 
         // ThumbnailFile is the struct field type
-        // thumbnailValue is the struct type created above to implement the Value interface
-        configurature.AddType[ThumbnailFile, thumbnailValue]()
+        configurature.AddType[ThumbnailFile]()
     }
 
 
