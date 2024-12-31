@@ -102,7 +102,13 @@ func (m *mapValueType[T]) Set(v string) error {
 }
 
 func (m *mapValueType[T]) Type() string {
-	return m.getType()
+	if m.typeName == "" {
+		// Get name from type of T
+		vtypes := strings.Split(fmt.Sprintf("%T", new(T)), ".")
+		m.typeName = vtypes[len(vtypes)-1]
+		m.typeName = strings.TrimPrefix(m.typeName, "*")
+	}
+	return m.typeName
 }
 
 func (m *mapValueType[T]) Interface() interface{} {
@@ -114,16 +120,4 @@ func (m *mapValueType[T]) Interface() interface{} {
 	} else {
 		return v
 	}
-}
-
-// getType gets and cache the type name. Note: type() is an invalid method
-// name in Go
-func (m *mapValueType[T]) getType() string {
-	if m.typeName == "" {
-		// Get name from type of T
-		vtypes := strings.Split(fmt.Sprintf("%T", new(T)), ".")
-		m.typeName = vtypes[len(vtypes)-1]
-		m.typeName = strings.TrimPrefix(m.typeName, "*")
-	}
-	return m.typeName
 }

@@ -18,26 +18,18 @@ which is used to specify a configuration file field on a configurature struct
 */
 package configurature
 
-type (
-	// Type representing a config file setting
-	ConfigFile string
-	// Value interface implementation for ConfigFile
-	configFileValue ConfigFile
-)
+// Type representing a config file setting
+type ConfigFile string
 
-func (f *configFileValue) String() string {
+func (f *ConfigFile) String() string {
 	return (string)(*f)
 }
 
-func (f *configFileValue) Set(v string) error {
-	*f = (configFileValue)(v)
+func (f *ConfigFile) Set(v string) error {
+	*f = (ConfigFile)(v)
 	return nil
 }
 
-func (f *configFileValue) Type() string {
+func (f *ConfigFile) Type() string {
 	return "configFile"
-}
-
-func (f *configFileValue) Interface() interface{} {
-	return (ConfigFile)(*f)
 }
