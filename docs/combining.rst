@@ -186,11 +186,11 @@ short flag names instead of quietly resulting in unintended
 configuration.
 
 
-Get
----
+Using Get
+-------------
 
-You can also use ``Get[T]()`` from anywhere in your app as long as
-``Configure[T]()`` has been called.
+You can also use ``configurature.Get[T]()`` from anywhere in your app as long as
+``Configure[T]()`` has previously been called.
 
 .. code:: go
 
