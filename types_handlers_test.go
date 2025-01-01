@@ -21,10 +21,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/spf13/pflag"
-	"github.com/stretchr/testify/assert"
-
 	co "github.com/imoore76/configurature"
+	flag "github.com/spf13/pflag"
+	"github.com/stretchr/testify/assert"
 )
 
 /*
@@ -58,14 +57,20 @@ func (i *ImageFile) Type() string {
 	return "imageFile"
 }
 
+func (i *ImageFile) Interface() interface{} {
+	return ImageFile(*i)
+}
+
 type MyConfig struct {
 	StateFile string        `desc:"File in which to store lock state" short:"s"`
 	Image     ImageFile     `desc:"Path to an image"`
+	Images    []ImageFile   `desc:"Paths to images"`
 	Conf      co.ConfigFile `desc:"Configuration file"`
 }
 
 func addImageFileTypes() {
 	co.AddType[ImageFile]()
+	co.AddType[[]ImageFile]()
 }
 
 func TestRegisterCustomType(t *testing.T) {
@@ -80,7 +85,7 @@ func TestCustomType_Flag(t *testing.T) {
 
 	conf := co.Configure[MyConfig](&co.Options{
 		Args:  []string{"--image=" + tmp.Name()},
-		Usage: func(_ *pflag.FlagSet) {},
+		Usage: func(_ *flag.FlagSet) {},
 	})
 
 	assert := assert.New(t)
@@ -93,7 +98,7 @@ func TestCustomType_Error(t *testing.T) {
 
 		co.Configure[MyConfig](&co.Options{
 			Args:  []string{"--image", "./go.mod"},
-			Usage: func(_ *pflag.FlagSet) {},
+			Usage: func(_ *flag.FlagSet) {},
 		})
 		os.Exit(0)
 	}
@@ -117,9 +122,101 @@ func TestCustomType_ErrorConfigFile(t *testing.T) {
 
 		co.Configure[MyConfig](&co.Options{
 			Args:  []string{"--conf", tmp.Name()},
-			Usage: func(_ *pflag.FlagSet) {},
+			Usage: func(_ *flag.FlagSet) {},
 		})
 		os.Exit(1)
+	}
+
+	stdout, stderr := runExternal(t)
+	assert := assert.New(t)
+	assert.Equal("", stdout)
+	assert.Equal(`error parsing configuration: unable to set value for image: `+
+		`file type ".mod" not supported`+"\n", stderr)
+
+}
+
+func TestCustomSliceType_Flag(t *testing.T) {
+	addImageFileTypes()
+
+	files := make([]string, 3)
+	expected := make([]ImageFile, 3)
+	for idx := range 3 {
+		tmp, _ := os.CreateTemp("", "ldlm-test-*.png")
+		tmp.Close()
+		defer os.Remove(tmp.Name())
+
+		files[idx] = tmp.Name()
+		expected[idx] = ImageFile(tmp.Name())
+	}
+
+	conf := co.Configure[MyConfig](&co.Options{
+		Args:  []string{"--images", strings.Join(files, ",")},
+		Usage: func(_ *flag.FlagSet) {},
+	})
+
+	assert := assert.New(t)
+	assert.Equal(expected, conf.Images)
+}
+
+func TestCustomSliceType_Error(t *testing.T) {
+	addImageFileTypes()
+	if os.Getenv("TEST_PASSTHROUGH") == "1" {
+
+		co.Configure[MyConfig](&co.Options{
+			Args:  []string{"--images", "./go.mod"},
+			Usage: func(_ *flag.FlagSet) {},
+		})
+		os.Exit(0)
+	}
+
+	stdout, stderr := runExternal(t)
+	assert := assert.New(t)
+	assert.Equal(`invalid argument "./go.mod" for "--images" flag: file type `+
+		`".mod" not supported`+"\n", stdout)
+	assert.Equal(`invalid argument "./go.mod" for "--images" flag: file type `+
+		`".mod" not supported`+"\n", stderr)
+
+}
+
+func TestCustomSliceType_ConfigFile(t *testing.T) {
+	addImageFileTypes()
+	files := make([]string, 3)
+	expected := make([]ImageFile, 3)
+	for idx := range 3 {
+		tmp, _ := os.CreateTemp("", "ldlm-test-config-file*.png")
+		tmp.Close()
+		defer os.Remove(tmp.Name())
+
+		files[idx] = tmp.Name()
+		expected[idx] = ImageFile(tmp.Name())
+	}
+
+	tmp, _ := os.CreateTemp("", "ldlm-test-*.yaml")
+	tmp.Write([]byte("images:\n  - " + strings.Join(files, "\n  - ") + "\n"))
+	tmp.Close()
+	defer os.Remove(tmp.Name())
+
+	conf := co.Configure[MyConfig](&co.Options{
+		Args:  []string{"--conf", tmp.Name()},
+		Usage: func(_ *flag.FlagSet) {},
+	})
+
+	assert.Equal(t, expected, conf.Images)
+}
+
+func TestCustomSliceType_ErrorConfigFile(t *testing.T) {
+	addImageFileTypes()
+	if os.Getenv("TEST_PASSTHROUGH") == "1" {
+		tmp, _ := os.CreateTemp("", "ldlm-test-*.yml")
+		defer os.Remove(tmp.Name())
+		tmp.Write([]byte("image: ./go.mod\n"))
+		tmp.Close()
+
+		co.Configure[MyConfig](&co.Options{
+			Args:  []string{"--conf", tmp.Name()},
+			Usage: func(_ *flag.FlagSet) {},
+		})
+		panic("Expected exit")
 	}
 
 	stdout, stderr := runExternal(t)
@@ -133,7 +230,7 @@ func TestCustomType_ErrorConfigFile(t *testing.T) {
 func TestMapValueType(t *testing.T) {
 	type Color string
 
-	co.AddMapValueType("", map[string]Color{
+	co.AddMapValueType[Color]("", map[string]Color{
 		"red":   "#ff0000",
 		"blue":  "#0000ff",
 		"green": "#00ff00",
@@ -145,7 +242,7 @@ func TestMapValueType(t *testing.T) {
 
 	conf := co.Configure[CConf](&co.Options{
 		Args:  []string{"--background", "blue"},
-		Usage: func(_ *pflag.FlagSet) {},
+		Usage: func(_ *flag.FlagSet) {},
 	})
 
 	assert.Equal(t, conf.Background, Color("#0000ff"))
@@ -154,7 +251,7 @@ func TestMapValueType(t *testing.T) {
 func TestMapValueType_NoValue(t *testing.T) {
 	type Color string
 
-	co.AddMapValueType("", map[string]Color{
+	co.AddMapValueType[Color]("", map[string]Color{
 		"red":   "#ff0000",
 		"blue":  "#0000ff",
 		"green": "#00ff00",
@@ -172,7 +269,7 @@ func TestMapValueType_NoValue(t *testing.T) {
 func TestMapValueType_BadValue(t *testing.T) {
 	type Color string
 
-	co.AddMapValueType("", map[string]Color{
+	co.AddMapValueType[Color]("", map[string]Color{
 		"red":   "#ff0000",
 		"blue":  "#0000ff",
 		"green": "#00ff00",
@@ -185,7 +282,7 @@ func TestMapValueType_BadValue(t *testing.T) {
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
 		co.Configure[CConf](&co.Options{
 			Args:  []string{"--background", "yellow"},
-			Usage: func(_ *pflag.FlagSet) {},
+			Usage: func(_ *flag.FlagSet) {},
 		})
 		panic("Should have exited")
 	}
@@ -202,7 +299,7 @@ func TestMapValueType_BadValue(t *testing.T) {
 func TestMapValueType_Usage(t *testing.T) {
 
 	type Color string
-	co.AddMapValueType("", map[string]Color{
+	co.AddMapValueType[Color]("", map[string]Color{
 		"red":   "#ff0000",
 		"blue":  "#0000ff",
 		"green": "#00ff00",

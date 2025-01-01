@@ -83,13 +83,30 @@ func getSupportedTypes() []string {
 	return supported
 }
 
+// addSliceType adds a custom slice type
+func addSliceType[T any]() {
+
+	// Create a new var of type *structFieldType and make sure it implements the
+	// required Value interface
+	ptrType := new(sliceFieldOfType[T])
+	if !reflect.TypeOf(ptrType).Implements(reflect.TypeFor[Value]()) {
+		panic(fmt.Sprintf("%T must implement Value", ptrType))
+	}
+
+	addToCustomFlagMap[sliceFieldOfType[T], T]()
+}
+
 // AddType adds a custom type to the customFlagMap. You can also use this
 // to replace the behavior of existing types.
 //
 // Parameters:
 // - structFieldType: The type of struct field
 func AddType[structFieldType any]() {
-	rt := reflect.TypeFor[structFieldType]()
+	// If the type is a slice, add a custom slice type
+	if reflect.TypeFor[structFieldType]().Kind() == reflect.Slice {
+		addSliceType[structFieldType]()
+		return
+	}
 
 	// Create a new var of type *structFieldType and make sure it implements the
 	// required Value interface
@@ -98,8 +115,14 @@ func AddType[structFieldType any]() {
 		panic(fmt.Sprintf("%T must implement Value", ptrType))
 	}
 
-	// Add the value to the customFlagMap with a method that will add a flag
-	// of that type to the FlagSet
+	addToCustomFlagMap[structFieldType, structFieldType]()
+
+}
+
+// Add the value to the customFlagMap with a method that will add a flag
+// of that type to the FlagSet
+func addToCustomFlagMap[structFieldType any, valueType any]() {
+	rt := reflect.TypeFor[valueType]()
 	customFlagMap[rt] = func(name string, short string, def string, desc string, fs *pflag.FlagSet) {
 		l := new(structFieldType)
 		if def != "" {
@@ -121,6 +144,7 @@ func AddType[structFieldType any]() {
 			},
 		)
 	}
+
 }
 
 // addToFlagSet adds a flag to the provided FlagSet based on the given type.
@@ -206,18 +230,18 @@ func setNativeValue(rv reflect.Value, name string, fs *pflag.FlagSet) {
 		dest = dest.Elem()
 	}
 
-	// For Configurature MapValue types
-	if _, ok := mapValueTypeKeys[pfType.String()]; ok {
-		vs := reflect.ValueOf(fv).MethodByName("Interface").Call(nil)
-		if !vs[0].IsNil() {
-			dest.Set(vs[0].Elem())
-		}
-		return
-	}
-
 	// For Custom types
 	if _, ok := customFlagMap[pfType]; ok {
-		rv := reflect.ValueOf(fv)
+		// If the field has an Interface method, call it and set the value
+		if m := reflect.ValueOf(fv).MethodByName("Interface"); m.IsValid() {
+			cv := m.Call(nil)
+			if !cv[0].IsNil() {
+				dest.Set(cv[0].Elem())
+			}
+			return
+		}
+
+		rv = reflect.ValueOf(fv)
 		if rv.Kind() == reflect.Ptr {
 			rv = rv.Elem()
 		}

@@ -50,6 +50,7 @@ type Options struct {
 	Usage             func(*pflag.FlagSet) // Usage function called when configuration is incorrect or for --help
 	NoRecover         bool                 // Don't recover from panic
 	ShowInternalFlags bool                 // Show hidden internal flags
+	NoShortHelp       bool                 // Don't add "h" as a short help flag
 }
 
 // Configure will populate the supplied struct with options specified on the
@@ -72,7 +73,11 @@ func Configure[T any](opts *Options) *T {
 	f := pflag.NewFlagSet("config", pflag.ExitOnError)
 
 	// set up help flag
-	f.BoolP("help", "h", false, "show help and exit")
+	if opts.NoShortHelp {
+		f.Bool("help", false, "show help and exit")
+	} else {
+		f.BoolP("help", "h", false, "show help and exit")
+	}
 
 	// set Usage function
 	if opts.Usage != nil {

@@ -61,7 +61,7 @@ tasks:
       - misspell ./...
       - task: test
       - task: clean
-      - find . -type f -not -name "*.sh" -exec chmod a-x {} \;
+      - find . -path "./.venv" -prune -o -type f -not -name "*.sh" -exec chmod a-x {} \;
 
   test-clean:
     desc: "Clean test cache and run tests"
