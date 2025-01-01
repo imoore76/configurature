@@ -1,5 +1,5 @@
 ============================
-Struct Field Types
+Field Types
 ============================
 
 Supported field types
@@ -120,7 +120,7 @@ Add the type using Configurature's ``AddType()`` function as exemplified above.
 
 The struct field type can be used in a Configurature struct like so:
 
-.. code:: go
+.. code-block:: go
 
    type Config struct {
        ProductImage ThumbnailFile `desc:"Path to thumbnail for product"`
@@ -129,8 +129,9 @@ The struct field type can be used in a Configurature struct like so:
 This is just an example. In most cases a validator or a ``string`` field with an ``enum:"..."``
 tag will satisfy the use case. However,
 if a Configurature struct field uses an app specific type, you will need
-to define a custom type or use a `map value type <#map-value-types>`__
-in order to use it or use some translation to convert it to its type.
+to define a custom type, use a
+:ref:`map value type<fieldtypes:Map Value Custom Types>`,
+or use some translation logic to convert it.
 
 Slice of Custom Types
 --------------------------
@@ -142,7 +143,7 @@ if you want to use a slice of ``ThumbnailFile`` types, you will need to
 
 Then you can add the type to Configurature ``AddType[[]<CustomType>]()``. For example:
 
-.. code:: go
+.. code-block:: go
 
     func init() {
         configurature.AddType(ThumbnailFile)
@@ -151,31 +152,49 @@ Then you can add the type to Configurature ``AddType[[]<CustomType>]()``. For ex
 
 .. important::
 
-    The order in which the types are added is important. The slice type
+    The slice type
     must be added after the element type.
 
 The struct field type can be used in a Configurature struct like so:
 
-.. code:: go
+.. code-block:: go
 
    type Config struct {
        ProductImages []ThumbnailFile `desc:"Paths to thumbnails for product"`
    }
+
+Slice types are specified in CSV format for the CLI and environment variables.
+
+.. code-block:: shell
+
+    $ my_app --product_images "images/side.jpg,images/top.jpg,images/bottom.jpg"
+
+In configuration files, arrays are used.
+
+.. code-block:: yaml
+    :caption: config.yaml
+
+    product_images:
+      - images/side.jpg
+      - images/top.jpg
+      - images/bottom.jpg
 
 
 Map Value Custom Types
 --------------------------
 
 Map value types are custom types that are used to map strings to a
-custom set of values. Use ``AddMapValueType[T any](string, map[string]T)``
-(usually in an ``init()`` function)
-to create and register these types with configurature.
+custom set of values. Use ``AddMapValueType(typeName string, keys []string, values []T)`
+(usually in an ``init()`` function) to create and register these types
+with configurature.
 
-The type argument ``[T any]`` is the custom value type and can be
-omitted because it is inferred
-from the map value type. The string argument will be the name of the type
-in ``Usage()`` text and will default to the type's name.
-The map argument is the string -> value map.
+Its arguments are
+
+* ``typeName`` - The name of the type in ``Usage()`` text. Defaults to the type's name.
+* ``keys`` - The slice of keys to use for the map. A slice is used so that order is preserved.
+* ``values`` - The slice of values that correspond with the keys.
+
+See examples that follow.
 
 Log Level Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -183,42 +202,39 @@ Log Level Example
 This is all the code
 required to implement the ``slog.Level`` custom type in Configurature:
 
-.. code:: go
+.. code-block:: go
+    :caption: Register type
 
     func init() {
-        configurature.AddMapValueType("Level", map[string]slog.Level{
-            "debug": slog.LevelDebug,
-            "info":  slog.LevelInfo,
-            "warn":  slog.LevelWarn,
-            "error": slog.LevelError,
-        })
+        configurature.AddMapValueType("",
+            []string{
+                "debug",
+                "info",
+                "warn",
+                "error",
+            },
+            []slog.Level{
+                slog.LevelDebug,
+                slog.LevelInfo,
+                slog.LevelWarn,
+                slog.LevelError,
+            },
+        )
     }
 
 Defining this in a config struct looks like
 
-.. code:: go
+.. code-block:: go
+    :caption: Define config
 
-   type Config struct {
-       LogLevel slog.Level `desc:"Log level of app" default:"info"`
-   }
+    type Config struct {
+        LogLevel slog.Level `desc:"Log level of app" default:"info"`
+    }
 
-Usage text looks like
+.. code-block:: shell
+    :caption: Usage text
 
-::
-
-   --log_level Level   Log level (debug|info|warn|error) (default debug)
-
-.. important::
-    
-    Since map keys are not ordered, the order of these options will be
-    randomized. If you want them to appear in the same order every time you
-    may use the ``enum:"..."`` :ref:`tag<usage:tags>` to specify it.
-
-.. code:: go
-
-   type Config struct {
-       LogLevel slog.Level `desc:"Log level of app" enum:"debug,info,warn,error" default:"info"`
-   }
+    --log_level Level   Log level (debug|info|warn|error) (default debug)
 
 Color Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -230,21 +246,30 @@ Color Example
     reuse an existing type, you will have to create a new one that derives from
     the existing type. E.g. ``type Color string`` below.
 
-.. code:: go
+.. code-block:: go
+    :caption: Register type
 
     type Color string
 
     func init() {
-        configurature.AddMapValueType("", map[string]Color{
-            "red":   "#ff0000",
-            "blue":  "#0000ff",
-            "green": "#00ff00",
-        })
+        configurature.AddMapValueType("",
+            []string{
+                "red",
+                "blue",
+                "green",
+            },
+            []Color{
+                "#ff0000",
+                "#0000ff",
+                "#00ff00",
+            },
+        )
     }
 
 This can be specified on a config struct using the ``Color`` type.
 
-.. code:: go
+.. code-block:: go
+    :caption: Define config
 
     type Config struct {
         Background Color `desc:"Color of the background" default:"red"`
@@ -255,32 +280,85 @@ This can be specified on a config struct using the ``Color`` type.
 Delay Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. important::
-    
-    Since the ``time.Duration`` type is already supported by Configurature,
-    a derived type is created in Go.
-
-.. code:: go
-
-    type Delay time.Duration
-
-    func init() {
-        configurature.AddMapValueType("", map[string]Delay{
-            "short":  Delay(1 * time.Minute),
-            "medium": Delay(5 * time.Minute),
-            "long":   Delay(10 * time.Minute),
-        })
-    }
-
 .. note::
 
     In some cases, you may need to cast the value to the type. For example,
-    ``Delay(1 * time.Minute)`` etc. above.
+    ``Delay(1 * time.Minute)`` etc. below.
 
-.. code:: go
 
-   type Config struct {
+.. code-block:: go
+    :caption: Register type
+
+    // time.Duration is already registered. Use a `Delay` derived type
+    type Delay time.Duration
+
+    func init() {
+        configurature.AddMapValueType("",
+            []string{
+                "short",
+                "medium",
+                "long",
+            },
+            []Delay{
+                Delay(1 * time.Minute),
+                Delay(5 * time.Minute),
+                Delay(10 * time.Minute),
+            },
+        )
+    }
+
+.. code-block:: go
+    :caption: Define config
+
+    type Config struct {
         WaitTime   Delay `desc:"Delay time" default:"medium"`
-        Background Color `desc:"Color of the background" default:"red"`
-        Text       Color `desc:"Color of text" default:"blue"`
-   }
+    }
+
+Type Name Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+
+    If the value type name is too long or otherwise undesirable, a 
+    different type name can be specified. Below ``"Cluster"`` is specified
+    so that the full
+    type name ``"DeploymentClusterIdentifier"`` is not used.
+
+.. code-block:: go
+    :caption: Register type
+
+    func init() {
+        // "DeploymentClusterIdentifier" is a bit verbose.
+        // Use "Cluster" instead.
+        configurature.AddMapValueType("Cluster",
+            []string{
+                "dev",
+                "staging",
+                "prod",
+            },
+            []myapp.DeploymentClusterIdentifier{
+                // dev
+                uuid.FromString("ab0c39a5-9678-48d2-a534-7ba049988ae3"),
+                // staging
+                uuid.FromString("5ffeda13-9b47-404e-9985-12b7d77c9f5d"),
+                // prod
+                uuid.FromString("727953da-075d-4520-9aaf-9447e88f1677"),
+            },
+        )
+    }
+
+.. code-block:: go
+    :caption: Define config
+
+    type Config struct {
+        DeployTo  DeploymentClusterIdentifier `desc:"Cluster in which to deploy" default:"dev"`
+    }
+
+.. code-block:: shell
+    :caption: Help text
+
+    $ myapp --help
+    Command usage:
+        --deploy_to Cluster   Cluster in which to deploy (dev|staging|prod) (default dev)
+    -h, --help                show help and exit
+

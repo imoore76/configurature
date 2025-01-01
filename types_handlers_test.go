@@ -230,11 +230,10 @@ func TestCustomSliceType_ErrorConfigFile(t *testing.T) {
 func TestMapValueType(t *testing.T) {
 	type Color string
 
-	co.AddMapValueType[Color]("", map[string]Color{
-		"red":   "#ff0000",
-		"blue":  "#0000ff",
-		"green": "#00ff00",
-	})
+	co.AddMapValueType("",
+		[]string{"red", "blue", "green"},
+		[]Color{"#ff0000", "#0000ff", "#00ff00"},
+	)
 
 	type CConf struct {
 		Background Color `desc:"background color" default:"red"`
@@ -251,11 +250,10 @@ func TestMapValueType(t *testing.T) {
 func TestMapValueType_NoValue(t *testing.T) {
 	type Color string
 
-	co.AddMapValueType[Color]("", map[string]Color{
-		"red":   "#ff0000",
-		"blue":  "#0000ff",
-		"green": "#00ff00",
-	})
+	co.AddMapValueType("",
+		[]string{"red", "blue", "green"},
+		[]Color{"#ff0000", "#0000ff", "#00ff00"},
+	)
 
 	type CConf struct {
 		Background Color `desc:"background color"`
@@ -269,11 +267,10 @@ func TestMapValueType_NoValue(t *testing.T) {
 func TestMapValueType_BadValue(t *testing.T) {
 	type Color string
 
-	co.AddMapValueType[Color]("", map[string]Color{
-		"red":   "#ff0000",
-		"blue":  "#0000ff",
-		"green": "#00ff00",
-	})
+	co.AddMapValueType("",
+		[]string{"red", "blue", "green"},
+		[]Color{"#ff0000", "#0000ff", "#00ff00"},
+	)
 
 	type CConf struct {
 		Background Color `desc:"background color"`
@@ -299,14 +296,13 @@ func TestMapValueType_BadValue(t *testing.T) {
 func TestMapValueType_Usage(t *testing.T) {
 
 	type Color string
-	co.AddMapValueType[Color]("", map[string]Color{
-		"red":   "#ff0000",
-		"blue":  "#0000ff",
-		"green": "#00ff00",
-	})
+	co.AddMapValueType("",
+		[]string{"red", "blue", "green"},
+		[]Color{"#ff0000", "#0000ff", "#00ff00"},
+	)
 
 	type MVT struct {
-		Background Color `enum:"red,blue,green" desc:"background color" default:"red"`
+		Background Color `desc:"background color" default:"red"`
 	}
 
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {

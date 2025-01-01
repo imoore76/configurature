@@ -27,6 +27,19 @@ import (
 	"strings"
 )
 
+// addSliceType adds a custom slice type
+func addSliceType[T any]() {
+
+	// Create a new var of type *structFieldType and make sure it implements the
+	// required Value interface
+	ptrType := new(sliceFieldOfType[T])
+	if !reflect.TypeOf(ptrType).Implements(reflect.TypeFor[Value]()) {
+		panic(fmt.Sprintf("%T must implement Value", ptrType))
+	}
+
+	addToCustomFlagMap[sliceFieldOfType[T], T]()
+}
+
 // sliceFieldOfType is a wrapper around a slice of custom field types. It implements the Value
 // interface. It is meant to be instantiated ass “sliceFieldOfType[[]customFieldType]“. This
 // is done automatically when you call `AddType[[]CustomFieldType]`.

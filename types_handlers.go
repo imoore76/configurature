@@ -61,12 +61,10 @@ func init() {
 	}
 
 	// Add Configurature custom types
-	AddMapValueType("", map[string]slog.Level{
-		"debug": slog.LevelDebug,
-		"info":  slog.LevelInfo,
-		"warn":  slog.LevelWarn,
-		"error": slog.LevelError,
-	})
+	AddMapValueType("",
+		[]string{"debug", "info", "warn", "error"},
+		[]slog.Level{slog.LevelDebug, slog.LevelInfo, slog.LevelWarn, slog.LevelError},
+	)
 	AddType[ConfigFile]()
 
 }
@@ -81,19 +79,6 @@ func getSupportedTypes() []string {
 		supported = append(supported, t.String())
 	}
 	return supported
-}
-
-// addSliceType adds a custom slice type
-func addSliceType[T any]() {
-
-	// Create a new var of type *structFieldType and make sure it implements the
-	// required Value interface
-	ptrType := new(sliceFieldOfType[T])
-	if !reflect.TypeOf(ptrType).Implements(reflect.TypeFor[Value]()) {
-		panic(fmt.Sprintf("%T must implement Value", ptrType))
-	}
-
-	addToCustomFlagMap[sliceFieldOfType[T], T]()
 }
 
 // AddType adds a custom type to the customFlagMap. You can also use this

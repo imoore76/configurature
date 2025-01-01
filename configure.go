@@ -69,38 +69,8 @@ func Configure[T any](opts *Options) *T {
 		opts:   opts,
 	}
 
-	// Set up a flagset
-	f := pflag.NewFlagSet("config", pflag.ExitOnError)
-
-	// set up help flag
-	if opts.NoShortHelp {
-		f.Bool("help", false, "show help and exit")
-	} else {
-		f.BoolP("help", "h", false, "show help and exit")
-	}
-
-	// set Usage function
-	if opts.Usage != nil {
-		f.Usage = func() { opts.Usage(f) }
-	} else {
-		f.Usage = func() {
-			fmt.Println("Command usage:")
-			fmt.Println(f.FlagUsages())
-			os.Exit(0)
-		}
-	}
-
-	// print_env_template flag setup
-	f.Bool("print_env_template", false, "Print example environment variables and exit")
-	if !opts.ShowInternalFlags {
-		f.MarkHidden("print_env_template")
-	}
-
-	// print_yaml_template flag setup
-	f.Bool("print_yaml_template", false, "Print example YAML config file and exit")
-	if !opts.ShowInternalFlags {
-		f.MarkHidden("print_yaml_template")
-	}
+	// Create a flagset
+	f := flagSetFromOptions(opts)
 
 	// This is a chicken and egg situation where we need to parse flags to
 	// determine what the config file flags are, but we want to load the config
@@ -132,7 +102,9 @@ func Configure[T any](opts *Options) *T {
 	}
 
 	// Load values from environment
-	c.setFromEnv(c.config, f)
+	if opts.EnvPrefix != "" {
+		c.setFromEnv(c.config, f)
+	}
 
 	// Parse CLI args into flagset and run flag setter functions
 	f.Parse(opts.Args)
@@ -311,4 +283,43 @@ func fieldNameToConfigName(name string, tags *structtag.Tags, ancestors []string
 		name = nm.Value()
 	}
 	return strings.Join(append(ancestors, strcase.ToSnake(name)), "_")
+}
+
+// flagSetFromOptions creates and returns a *pflag.FlagSet based on the
+// provided options
+func flagSetFromOptions(opts *Options) *pflag.FlagSet {
+
+	f := pflag.NewFlagSet("config", pflag.ExitOnError)
+
+	// Set up help flag
+	if opts.NoShortHelp {
+		f.Bool("help", false, "show help and exit")
+	} else {
+		f.BoolP("help", "h", false, "show help and exit")
+	}
+
+	// Set Usage function
+	if opts.Usage != nil {
+		f.Usage = func() { opts.Usage(f) }
+	} else {
+		f.Usage = func() {
+			fmt.Println("Command usage:")
+			fmt.Println(f.FlagUsages())
+			os.Exit(0)
+		}
+	}
+
+	// print_env_template flag setup
+	f.Bool("print_env_template", false, "Print example environment variables and exit")
+	if !opts.ShowInternalFlags {
+		f.MarkHidden("print_env_template")
+	}
+
+	// print_yaml_template flag setup
+	f.Bool("print_yaml_template", false, "Print example YAML config file and exit")
+	if !opts.ShowInternalFlags {
+		f.MarkHidden("print_yaml_template")
+	}
+
+	return f
 }
