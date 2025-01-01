@@ -159,7 +159,8 @@ func TestEnvVars(t *testing.T) {
 	setEnv("FooInts", "5,6,7,100")
 
 	c := co.Configure[TestConfig](&co.Options{
-		NoRecover: true, EnvPrefix: envPrefix,
+		NoRecover: true,
+		EnvPrefix: envPrefix,
 	})
 
 	assert := assert.New(t)
@@ -501,7 +502,7 @@ func TestSubConfig_EmptyNameEnv(t *testing.T) {
 		})
 	}()
 	assert.Nil(t, err)
-	assert.Equal(t, "aaaaasdfjaoisjdkfoiaj", conf.Bar.SubFooString)
+	assert.Equal(t, "here", conf.Bar.SubFooString)
 
 }
 

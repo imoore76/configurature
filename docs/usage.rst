@@ -264,14 +264,19 @@ EnvPrefix
 -----------------------
 
 The prefix to use when checking for configuration values specified as
-environment variables.
+environment variables. 
+
+.. important::
+
+    If not set, Configurature will not use environment variables.
 
 
 Args
 -----------------------
 
-The string of arguments to parse. Typically this would be set to 
-``os.Args[1:]``. The first element is the name of the command, so is not included.
+The string of arguments to parse. Typically this would be set to,
+and defaults to ``os.Args[1:]`` (the first element of ``os.Args``
+is the name of the command being run, so is not included).
 
 
 NilPtrs

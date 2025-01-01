@@ -30,18 +30,14 @@ var (
 	mapValueTypeKeys = make(map[string][]string)
 )
 
-// AddMapValueType creates a map value type based on the input mapping.
-//
-// The function takes a mapping of string keys to values and registers it as
-// a Configurature type.
-func AddMapValueType[T any](typeName string, mapping map[string]T) {
+// AddMapValueType takes a slice of string keys and values and registers it as
+// a string->value map Configurature type.
+func AddMapValueType[T any](typeName string, keys []string, values []T) {
+
 	nm := make(map[string]T)
-	keys := []string{}
-	for k, v := range mapping {
+	for idx := 0; idx < len(keys); idx++ {
 		// Convert to lower case
-		nm[strings.ToLower(k)] = v
-		// Store the keys for use in getMapValueTypeValues()
-		keys = append(keys, k)
+		nm[strings.ToLower(keys[idx])] = values[idx]
 	}
 
 	mapValueTypeKeys[reflect.TypeFor[T]().String()] = keys
