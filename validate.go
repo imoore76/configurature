@@ -142,7 +142,7 @@ func (c *configurer) validate(s interface{}, fs *pflag.FlagSet) {
 			}
 			errors = append(errors, fmt.Sprintf("%s must be one of %s", fName, strings.Join(enums, ", ")))
 		}
-		return false
+		return false // false == don't stop looping over fields
 	}, []string{})
 
 	// Register function that does field to name translation

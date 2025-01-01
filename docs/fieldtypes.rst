@@ -47,17 +47,16 @@ allows for adding `Custom Types <#custom-types>`__.
 Custom Types
 -------------
 
-A custom Configurature type specifies the type of struct field it is
-for, and how to interact with it by satisfying Configurature’s ``Value``
-interface.
+A custom Configurature field type specifies an exported type and how to interact with
+it by satisfying Configurature’s ``Value`` interface.
 
 .. code-block:: go
     :caption: Value interface
 
     type Value interface {
-        String() string
-        Set(string) error
-        Type() string
+        String() string     // String representation of value
+        Set(string) error   // Set the internal value from string
+        Type() string       // Type name to string
     }
 
 You may be writing a custom type to configure a Go struct field type
@@ -71,7 +70,6 @@ certain image file types and file size limits.
 
 .. code-block:: go
     :caption: thumbnail.go
-
 
     type (
         // go type to be set as config struct field types
@@ -92,7 +90,7 @@ certain image file types and file size limits.
         // accessing the file
         if st, err := os.Stat(v); err != nil {
             return err
-        } else if st.Size() > 5000000 {
+        } else if st.Size() >= 5000000 {
             return errors.New("file must be less than 5MB")
         }
         // This will fail if the file is not of the supported type
@@ -134,7 +132,38 @@ if a Configurature struct field uses an app specific type, you will need
 to define a custom type or use a `map value type <#map-value-types>`__
 in order to use it or use some translation to convert it to its type.
 
-Map Value Types
+Slice of Custom Types
+--------------------------
+In order to use a slice of custom types, you will need to define a
+:ref:`custom type<fieldtypes:Custom Types>` for the slice element type. For example, 
+if you want to use a slice of ``ThumbnailFile`` types, you will need to
+:ref:`define a custom type<fieldtypes:Custom Type Example>` for
+``ThumbnailFile``.
+
+Then you can add the type to Configurature ``AddType[[]<CustomType>]()``. For example:
+
+.. code:: go
+
+    func init() {
+        configurature.AddType(ThumbnailFile)
+        configurature.AddType([]ThumbnailFile)
+    }
+
+.. important::
+
+    The order in which the types are added is important. The slice type
+    must be added after the element type.
+
+The struct field type can be used in a Configurature struct like so:
+
+.. code:: go
+
+   type Config struct {
+       ProductImages []ThumbnailFile `desc:"Paths to thumbnails for product"`
+   }
+
+
+Map Value Custom Types
 --------------------------
 
 Map value types are custom types that are used to map strings to a
@@ -142,18 +171,14 @@ custom set of values. Use ``AddMapValueType[T any](string, map[string]T)``
 (usually in an ``init()`` function)
 to create and register these types with configurature.
 
-The type argument ``[T any]`` is the custom value type and can usually be
+The type argument ``[T any]`` is the custom value type and can be
 omitted because it is inferred
 from the map value type. The string argument will be the name of the type
 in ``Usage()`` text and will default to the type's name.
 The map argument is the string -> value map.
 
-Map Value Type Examples
+Log Level Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Here are some real-world examples.
-
-Log Level
-##########
 
 This is all the code
 required to implement the ``slog.Level`` custom type in Configurature:
@@ -195,8 +220,8 @@ Usage text looks like
        LogLevel slog.Level `desc:"Log level of app" enum:"debug,info,warn,error" default:"info"`
    }
 
-Color
-##########
+Color Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. warning::
 
     The type used in ``AddMapValueType`` can not be a type that
@@ -227,8 +252,8 @@ This can be specified on a config struct using the ``Color`` type.
     }
 
 
-Delay
-############
+Delay Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. important::
     

@@ -242,6 +242,7 @@ Options
         Usage             func(*flag.FlagSet) // Usage function called when configuration is incorrect or for --help
         NoRecover         bool                // Don't recover from panic
         ShowInternalFlags bool                // Show hidden internal flags
+        NoShortHelp       bool                // Don't add "h" as a short help flag
     }
 
 If not specified, the defaults are:
@@ -255,6 +256,7 @@ If not specified, the defaults are:
         Usage:             // internally composed
         NoRecover:         false,
         ShowInternalFlags: false,
+        NoShortHelp:       false,
     }
 
 
@@ -355,6 +357,37 @@ The default ``Usage`` function is
         fmt.Println(f.FlagUsages())
         os.Exit(0)
     }
+
+NoShortHelp
+----------------------
+Do not add ``-h`` as a short flag for help. This may be useful if there is a field that you want to use
+``-h`` for.
+
+.. code-block:: go
+
+    type Config struct {
+        HangTime time.Duration `desc:"Time to hang" short:"h" default:"1m"`
+    }
+
+    func main() {
+
+        conf := co.Configure[Config](&co.Options{
+            NoShortHelp: true,
+        })
+
+        fmt.Println(conf.HangTime)
+    }
+
+.. code-block:: shell
+    
+    user@host ~$ myapp --help
+    Command usage:
+    -h, --hang_time duration   Time to hang (default 1m0s)
+        --help                 show help and exit
+
+    user@host ~$ myapp -h 2h
+    2h0m0s
+
 
 Tags
 =======================
