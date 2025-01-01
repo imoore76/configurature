@@ -23,21 +23,19 @@ package main
 import (
     "fmt"
     "net"
-    "os"
 
     co "github.com/imoore76/configurature"
 )
 
-type AppConfig struct {
+type Config struct {
     ListenIP   net.IP `desc:"IP address on which to listen" default:"127.0.0.1"`
     ListenPort uint   `desc:"port on which to listen" default:"8080"`
 }
 
 func main() {
 
-    conf := co.Configure[AppConfig](&co.Options{
-        EnvPrefix: "APP_",
-        Args:      os.Args[1:],
+    conf := co.Configure[Config](&co.Options{
+        EnvPrefix: "MYAPP_",
     })
 
     fmt.Printf("IP: %s\n", conf.ListenIP)
@@ -53,6 +51,13 @@ Command usage:
   -h, --help               show help and exit
       --listen_ip ip       IP address on which to listen (default 127.0.0.1)
       --listen_port uint   port on which to listen (default 8080)
+```
+
+CLI option and environment variable example:
+```
+user@host $ MYAPP_LISTEN_IP=0.0.0.0 myapp --listen_port 80
+IP: 0.0.0.0
+Port: 80
 ```
 
 Configuration values can be specified on the command line, using environment variables, and/or in a config file.
