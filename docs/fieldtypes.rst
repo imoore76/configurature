@@ -184,7 +184,7 @@ Map Value Custom Types
 --------------------------
 
 Map value types are custom types that are used to map strings to a
-custom set of values. Use ``AddMapValueType(typeName string, keys []string, values []T)`
+custom set of values. Use ``AddMapValueType(typeName string, keys []string, values []T)``
 (usually in an ``init()`` function) to create and register these types
 with configurature.
 
