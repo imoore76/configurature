@@ -228,6 +228,53 @@ file output.
 Copy and paste, or redirect its output to a ``.yaml`` file,
 and edit as needed.
 
+Slices
+--------------
+
+Slices are specified on the CLI and in environment variables in CSV format.
+
+.. code-block:: shell
+    :caption: cli
+
+    user@host ~$ myapp --ports="3144,5580"
+
+.. code-block:: shell
+    :caption: environment
+
+    user@host ~$ APP_PORTS="3144,5580" myapp
+
+In configuration files, slices can be specified as arrays
+
+.. code-block:: yaml
+
+    # config.yaml
+    ports:
+      - 3144
+      - 5580
+
+Maps
+---------------
+Maps are specified on the CLI and in environment variables in ``key=value`` format.
+
+.. code-block:: shell
+    :caption: cli
+
+    user@host ~$ myapp --codes="red=5,yellow=3"
+
+.. code-block:: shell
+    :caption: environment
+
+    user@host ~$ APP_CODES="red=5,yellow=3" myapp
+
+In configuration files, maps can be specified as objects
+
+.. code-block:: yaml
+
+    # config.yaml
+    codes:
+      red: 5
+      yellow: 3
+
 Options
 =======================
 ``Configure[]()`` can be called with an ``Options`` pointer as input.
@@ -277,7 +324,6 @@ Args
 The string of arguments to parse. Typically this would be set to,
 and defaults to ``os.Args[1:]`` (the first element of ``os.Args``
 is the name of the command being run, so is not included).
-
 
 NilPtrs
 -----------------------
