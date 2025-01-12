@@ -5,12 +5,11 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-from pathlib import Path
+import os
 
 from setuptools_scm import get_version
-from setuptools_scm.git import GitWorkdir
 
-if GitWorkdir(Path("../").resolve()).get_branch() == 'stable':
+if os.getenv("READTHEDOCS_VERSION_NAME", "") == 'stable':
 	# For stable branch, just use the latest tag string
 	release = get_version(
 		root="../",
