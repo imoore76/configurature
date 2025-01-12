@@ -6,12 +6,22 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
+
 from setuptools_scm import get_version
+
+if os.getenv("READTHEDOCS_VERSION_NAME", "") == 'stable':
+	# For stable branch, just use the latest tag string
+	release = get_version(
+		root="../",
+		version_scheme=lambda v: str(v.tag),
+		local_scheme=lambda _: "",
+	)
+else:
+	release = get_version(root='../')
 
 project = 'Configurature'
 copyright = '2024, Google LLC'
 author = 'Ian Moore'
-release = get_version(root=os.path.abspath('../'))
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
