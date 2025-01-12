@@ -10,7 +10,10 @@ from pathlib import Path
 from setuptools_scm import get_version
 from setuptools_scm.git import GitWorkdir
 
-if GitWorkdir(Path("../").resolve()).get_branch() == 'stable':
+branch = GitWorkdir(Path("../").resolve()).get_branch()
+print(f"Branch: {branch}")
+
+if branch:
 	# For stable branch, just use the latest tag string
 	release = get_version(
 		root="../",
