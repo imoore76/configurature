@@ -5,6 +5,7 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import os
 from pathlib import Path
 
 from setuptools_scm import get_version
@@ -12,6 +13,9 @@ from setuptools_scm.git import GitWorkdir
 
 branch = GitWorkdir(Path("../").resolve()).get_branch()
 print(f"Branch: {branch}")
+
+for k in os.environ.keys():
+	print(f"{k}={os.environ[k]}")
 
 if branch:
 	# For stable branch, just use the latest tag string
