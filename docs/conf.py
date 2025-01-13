@@ -9,8 +9,8 @@ import os
 
 from setuptools_scm import get_version
 
-if os.getenv("READTHEDOCS_VERSION_NAME", "") == 'stable':
-	# For stable branch, just use the latest tag string
+if os.getenv("READTHEDOCS_VERSION_NAME", "") != 'latest':
+	# For stable branches, just use the latest tag string
 	release = get_version(
 		root="../",
 		version_scheme=lambda v: str(v.tag),
