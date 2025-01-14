@@ -1,5 +1,4 @@
 sphinx
 sphinx_rtd_theme
 myst-parser
-setuptools-scm>=8
 sphinx-tabs
