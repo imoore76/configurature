@@ -243,7 +243,7 @@ Slices are specified on the CLI and in environment variables in CSV format.
 
     user@host ~$ APP_PORTS="3144,5580" myapp
 
-In configuration files, slices can be specified as arrays
+In configuration files, slices can be specified as lists.
 
 .. code-block:: yaml
 
@@ -266,7 +266,7 @@ Maps are specified on the CLI and in environment variables in ``key=value`` form
 
     user@host ~$ APP_CODES="red=5,yellow=3" myapp
 
-In configuration files, maps can be specified as objects
+In configuration files, maps can be specified as dictionaries.
 
 .. code-block:: yaml
 
