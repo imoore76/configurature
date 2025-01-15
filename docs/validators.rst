@@ -117,7 +117,7 @@ String Validators
       - Contains Any
       - the string with the characters of which at least one must be in the value
     * - ``endsnotwith=...``
-      - Ends Not With
+      - Does not end with
       - the string that the value must not end with
     * - ``endswith=...``
       - Ends With
@@ -150,7 +150,7 @@ String Validators
       - The value must match the supplied regex
       - A valid regular expression. E.g. ``^\d{3}-\d{3}-\d{4}$``
     * - ``startsnotwith=...``
-      - Starts Not With
+      - Does not start with
       - the string with which the value must not start
     * - ``startswith=...``
       - Starts With
