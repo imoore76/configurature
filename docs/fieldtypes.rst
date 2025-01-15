@@ -234,7 +234,7 @@ Defining this in a config struct looks like
 .. code-block:: shell
     :caption: Usage text
 
-    --log_level Level   Log level (debug|info|warn|error) (default debug)
+    --log_level Level   Log level (debug|info|warn|error) (default info)
 
 Color Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
