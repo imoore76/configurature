@@ -13,19 +13,11 @@ Configurature
 .. centered::
 	Simple, flexible, and powerful application configuration for Go.
 
-Contents
-----------
 
-.. toctree::
-    :maxdepth: 2
+Read The Docs
+------------------
+See the complete documentation at `http://configurature-docs.readthedocs.io <http://configurature-docs.readthedocs.io>`_.
 
-    overview
-    usage
-    combining
-    fieldtypes
-    validators
-    contributing
-    license
 
 Disclaimer
 --------------------
