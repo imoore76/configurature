@@ -11,7 +11,7 @@ using environment variables, and/or in a config file (yaml or json).
 Configuration structs can be composed in a way that your application's entry points do not
 need to be aware of the structure of other packages' configurations in order to initialize them.
 
-See the complete documentation at http://configurature.readthedocs.io.
+See the complete documentation at [http://configurature-docs.readthedocs.io](http://configurature-docs.readthedocs.io).
 
 ## Basic Usage
 
@@ -68,7 +68,7 @@ Configurature also supports
 * Validation
 * Nested configurations
 
-See the complete documentation at http://configurature.readthedocs.io.
+See the complete documentation at [http://configurature-docs.readthedocs.io](http://configurature-docs.readthedocs.io).
 
 ## Contributing
 
