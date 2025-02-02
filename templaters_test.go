@@ -112,9 +112,9 @@ str: yes"no
 
 # a string slice
 strs:
-- "1"
-- "2"
-- "3"
+    - "1"
+    - "2"
+    - "3"
 
 # a string pointer
 st_ptr: some-string
@@ -134,13 +134,13 @@ sub:
 
     # Names and ages map
     ages:
-      a: 1
-      b: 2
-      c: 3
+        a: 1
+        b: 2
+        c: 3
 
 # IP addresses
 ips:
-- 127.0.0.1
+    - 127.0.0.1
 
 `, stdout)
 
