@@ -30,7 +30,7 @@ import (
 	"github.com/fatih/structtag"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/pflag"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // setConfigFile checks for a field of type File in the config struct and sets
