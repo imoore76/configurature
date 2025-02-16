@@ -166,7 +166,12 @@ func (c *configurer) loadFlags(s interface{}, fl *pflag.FlagSet) []func() {
 		fName := fieldNameToConfigName(f.Name, tags, ancestors)
 		descTag, err := tags.Get("desc")
 		if err != nil {
-			panic(fmt.Sprintf("%s (%s): error parsing field %v: 'desc'", f.Name, fName, err))
+			descTag = &structtag.Tag{
+				Key: "desc",
+				Name: strings.ReplaceAll(
+					fieldNameToConfigName(f.Name, tags, ancestors), "_", " ",
+				),
+			}
 		}
 		shortTag, _ := tags.Get("short")
 		if shortTag == nil {
