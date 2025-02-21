@@ -27,15 +27,15 @@ import (
 	"fmt"
 	"net"
 
-  // Package in my app with a Config struct defined
-  "github.com/me/myapp/theme"
+	// Package in "myapp" with a Config struct defined
+	"github.com/me/myapp/theme"
 
 	co "github.com/imoore76/configurature"
 )
 
 // Database config struct.
 type DBConfig struct {
-	Host     string `validate:"required"` // this field is required
+	Host     string `validate:"required"`      // this field is required
 	Port     int    `default:"5432" short:"p"` // specify "short" flag
 	User     string `default:"postgres"`
 	Password string `default:"postgres"`
@@ -52,10 +52,10 @@ type ServerConfig struct {
 type Config struct {
 	ServerConfig                  // Embedded struct
 	DB              DBConfig      // Sub-config in `DB` struct
-    Theme           theme.Config  // Sub-config from "theme" package
-	CalculatedField string        `ignore:"true"` // ignore this field
+	Theme           theme.Config  // Sub-config from "theme" package
+	CalculatedField string        `ignore:"true"`                               // ignore this field
 	LogLevel        string        `default:"info" enum:"debug,info,warn,error"` // enum field
-	Conf            co.ConfigFile `desc:"Configuration file"` // config file
+	Conf            co.ConfigFile `desc:"Configuration file"`                   // config file
 }
 
 func main() {
@@ -68,6 +68,18 @@ func main() {
 	fmt.Printf("Log level: %s\n", conf.LogLevel)
 	fmt.Printf("IP: %s\n", conf.ListenIP)
 	fmt.Printf("Port: %d\n", conf.ListenPort)
+
+  /*
+  E.g.
+
+  setLogLevel(conf.LogLevel)
+  
+  initDB(conf.DB)
+  
+  theme.SetDisplay(conf.Theme)
+  
+  runServer(conf.ServerConfig)
+  */
 }
 ```
 
