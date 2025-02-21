@@ -5,6 +5,9 @@
 </p>
 
 Configurature is a Go library that provides declarative app configuration using structs.
+It is designed with sensible default behavior while allowing for fine-grained
+configuration if desired.
+
 Configuration values can be specified (in value precedence order) on the command line,
 using environment variables, and/or in a config file (yaml or json).
 
@@ -13,7 +16,7 @@ need to be aware of the structure of other packages' configurations in order to 
 
 See the complete documentation at [http://configurature-docs.readthedocs.io](http://configurature-docs.readthedocs.io).
 
-## Basic Usage
+## Usage
 
 Basic usage consists of defining your configuration structs and running `configurature.Configure()`.
 
@@ -24,31 +27,35 @@ import (
 	"fmt"
 	"net"
 
+  // Package in my app with a Config struct defined
+  "github.com/me/myapp/theme"
+
 	co "github.com/imoore76/configurature"
 )
 
-// DB config struct. Could also reside in your application's "db" package.
+// Database config struct.
 type DBConfig struct {
 	Host     string `validate:"required"` // this field is required
-	Port     int    `desc:"Database port" default:"5432"`
-	User     string `desc:"Database user" default:"postgres"`
-	Password string `desc:"Database password" default:"postgres"`
+	Port     int    `default:"5432" short:"p"` // specify "short" flag
+	User     string `default:"postgres"`
+	Password string `default:"postgres"`
 }
 
 // Network server config struct. Could also reside in a different package.
 type ServerConfig struct {
 	ServerName  string `name:"hostname"` // rename this field in the config
 	ReadTimeout int    // no struct tags are required
-	ListenIP    net.IP `default:"127.0.0.1"`
+	ListenIP    net.IP `dec:"IP address on which to listen" default:"127.0.0.1"`
 	ListenPort  uint   `default:"8080"`
 }
 
 type Config struct {
 	ServerConfig                  // Embedded struct
-	CalculatedField string        `ignore:"true"` // ignore this field
 	DB              DBConfig      // Sub-config in `DB` struct
-	LogLevel        string        `desc:"Log level" default:"info"` // direct field
-	Conf            co.ConfigFile `desc:"Configuration file" short:"c"`
+    Theme           theme.Config  // Sub-config from "theme" package
+	CalculatedField string        `ignore:"true"` // ignore this field
+	LogLevel        string        `default:"info" enum:"debug,info,warn,error"` // enum field
+	Conf            co.ConfigFile `desc:"Configuration file"` // config file
 }
 
 func main() {
@@ -68,17 +75,19 @@ Running this app with `--help` displays the app usage:
 
 ```
 Command usage:
-  -c, --conf configFile      Configuration file
+      --conf configFile      Configuration file
       --db_host string       db host
-      --db_password string   Database password (default "postgres")
-      --db_port int          Database port (default 5432)
-      --db_user string       Database user (default "postgres")
+      --db_password string   db password (default "postgres")
+  -p, --db_port int          db port (default 5432)
+      --db_user string       db user (default "postgres")
   -h, --help                 show help and exit
       --hostname string      hostname
-      --listen_ip ip         listen ip (default 127.0.0.1)
+      --listen_ip ip         IP address on which to listen (default 127.0.0.1)
       --listen_port uint     listen port (default 8080)
-      --log_level string     Log level (default "info")
+      --log_level string     log level (debug|info|warn|error) (default "info")
       --read_timeout int     read timeout
+      --theme_fg rgb         Foreground color (#FFFFFF)
+      --theme_bg rgb         Background color (#000000)
 ```
 
 CLI option and environment variable example:
@@ -104,6 +113,10 @@ db:
   port: 5432
   user: postgres
   password: postgres
+
+theme:
+  fg: "#FF0000"
+  bg: "#000000"
 ```
 
 Configuration values can be specified on the command line, using environment variables, and/or in a config file.
@@ -131,7 +144,7 @@ hostname: ""
 # read timeout
 read_timeout: 0
 
-# listen ip
+# IP address on which to listen
 listen_ip: 127.0.0.1
 
 # listen port
@@ -142,17 +155,23 @@ db:
   # db host
   host: ""
 
-  # Database port
+  # db port
   port: 5432
 
-  # Database user
+  # db user
   user: postgres
 
-  # Database password
+  # db password
   password: postgres
 
-# Log level
+# log level (debug|info|warn|error)
 log_level: info
+
+theme:
+  # Foreground color
+  fg: "#FFFFFF"
+  # Background color
+  bg: "#000000"
 ```
 
 Print environment variable template:
@@ -168,29 +187,35 @@ MYAPP_CONF=""
 # db host
 MYAPP_DB_HOST=""
 
-# Database password
+# db password
 MYAPP_DB_PASSWORD="postgres"
 
-# Database port
+# db port
 MYAPP_DB_PORT="5432"
 
-# Database user
+# db user
 MYAPP_DB_USER="postgres"
 
 # hostname
 MYAPP_HOSTNAME=""
 
-# listen ip
+# IP address on which to listen
 MYAPP_LISTEN_IP="127.0.0.1"
 
 # listen port
 MYAPP_LISTEN_PORT="8080"
 
-# Log level
+# log level (debug|info|warn|error)
 MYAPP_LOG_LEVEL="info"
 
 # read timeout
 MYAPP_READ_TIMEOUT="0"
+
+# Foreground color
+MYAPP_THEME_FG="#FFFFFF"
+
+# Background color
+MYAPP_THEME_BG="#000000"
 ```
 
 Templates use existing values.
