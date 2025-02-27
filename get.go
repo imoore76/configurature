@@ -21,13 +21,13 @@ import (
 
 var (
 	// lastConfigLoaded is the last loaded configuration
-	lastConfigLoaded interface{}
+	lastConfigLoaded any
 
 	// ErrConfigNotLoaded is returned when the last loaded configuration is nil
 	ErrConfigNotLoaded = errors.New("configuration not loaded - did you run Configure[]()?")
 
 	// cache for getting config types
-	getConfigTypeCache = make(map[reflect.Type]interface{})
+	getConfigTypeCache = make(map[reflect.Type]any)
 
 	// For disabling type caching
 	DisableGetTypeCache = false
@@ -46,7 +46,7 @@ func Get[T any]() (*T, error) {
 		return t, nil
 	}
 
-	var t interface{}
+	var t any
 	if !DisableGetTypeCache {
 		typeKey := reflect.TypeFor[T]()
 		var ok bool
@@ -62,7 +62,7 @@ func Get[T any]() (*T, error) {
 }
 
 // findStructOfType recursively searches for a struct of type T in struct s
-func findStructOfType[T any](s interface{}) *T {
+func findStructOfType[T any](s any) *T {
 	v := reflect.ValueOf(s).Elem()
 	t := v.Type()
 
@@ -89,10 +89,10 @@ func findStructOfType[T any](s interface{}) *T {
 }
 
 // setLastConfig sets the last loaded configuration
-func setLastConfig(config interface{}) {
+func setLastConfig(config any) {
 	// Set last config
 	lastConfigLoaded = config
 
 	// Clear getConfigTypeCache each time a new config is loaded
-	getConfigTypeCache = make(map[reflect.Type]interface{})
+	getConfigTypeCache = make(map[reflect.Type]any)
 }

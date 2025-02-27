@@ -57,7 +57,7 @@ func (i *ImageFile) Type() string {
 	return "imageFile"
 }
 
-func (i *ImageFile) Interface() interface{} {
+func (i *ImageFile) Interface() any {
 	return ImageFile(*i)
 }
 

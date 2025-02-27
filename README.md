@@ -98,8 +98,8 @@ Command usage:
       --listen_port uint     listen port (default 8080)
       --log_level string     log level (debug|info|warn|error) (default "info")
       --read_timeout int     read timeout
-      --theme_fg rgb         Foreground color (#FFFFFF)
-      --theme_bg rgb         Background color (#000000)
+      --theme_fg rgb         Foreground color (default #FFFFFF)
+      --theme_bg rgb         Background color (default #000000)
 ```
 
 CLI option and environment variable example:

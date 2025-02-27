@@ -77,7 +77,7 @@ func (c *configurer) loadConfigFile(fs *pflag.FlagSet) {
 	}
 
 	// Parse config file based on extension
-	gMap := make(map[string]interface{})
+	gMap := make(map[string]any)
 	switch fp.Ext(strings.ToLower(*fileName)) {
 	case ".json":
 		err = json.Unmarshal(confFile, &gMap)
@@ -104,16 +104,16 @@ func (c *configurer) loadConfigFile(fs *pflag.FlagSet) {
 // is called after reading the config file.
 //
 // Parameters:
-// - gMap: a pointer to a map[string]interface{}
+// - gMap: a pointer to a map[string]any
 // - path: a slice of strings representing the path
 // - fs: a pointer to a pflag.FlagSet
-func setFlagsFromGenericMap(gMap *map[string]interface{}, ancestors []string, fs *pflag.FlagSet) {
+func setFlagsFromGenericMap(gMap *map[string]any, ancestors []string, fs *pflag.FlagSet) {
 	for k, v := range *gMap {
 
-		// Yaml unmarshals into a map[interface{}]interface{} for
-		// sub-objects. Convert them to a map[string]interface{}
-		if ifaceIfaceMap, ok := v.(map[interface{}]interface{}); ok {
-			newV := make(map[string]interface{})
+		// Yaml unmarshals into a map[any]any for
+		// sub-objects. Convert them to a map[string]any
+		if ifaceIfaceMap, ok := v.(map[any]any); ok {
+			newV := make(map[string]any)
 			for kk, vv := range ifaceIfaceMap {
 				newV[fmt.Sprintf("%v", kk)] = vv
 			}
@@ -122,7 +122,7 @@ func setFlagsFromGenericMap(gMap *map[string]interface{}, ancestors []string, fs
 
 		// If it is a map object, it is either an actual map or nested
 		// configuration
-		if nested, ok := v.(map[string]interface{}); ok {
+		if nested, ok := v.(map[string]any); ok {
 			// Name was found in FlagSet. It's an actual map
 			mapk := strings.Join(append(ancestors, k), "_")
 			if flg := fs.Lookup(mapk); flg != nil {
@@ -151,10 +151,10 @@ func setFlagsFromGenericMap(gMap *map[string]interface{}, ancestors []string, fs
 		if reflect.ValueOf(v).Kind() == reflect.Slice {
 
 			writeCsv := false
-			vals := make([]string, len(v.([]interface{})))
+			vals := make([]string, len(v.([]any)))
 
 			// Populate vals and check if we need to write csv
-			for idx, val := range v.([]interface{}) {
+			for idx, val := range v.([]any) {
 				vals[idx] = fmt.Sprintf("%v", val)
 				if strings.Contains(vals[idx], `"`) || strings.Contains(vals[idx], `,`) {
 					writeCsv = true

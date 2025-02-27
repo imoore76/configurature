@@ -83,7 +83,7 @@ func (c *configurer) printYamlTemplate(fs *pflag.FlagSet) {
 
 		ymlVal := strings.Builder{}
 		encoder := yaml.NewEncoder(&ymlVal)
-		encoder.Encode(map[string]interface{}{
+		encoder.Encode(map[string]any{
 			stripAncestors(fName, ancestors): v.Elem().Interface(),
 		})
 		encoder.Close()

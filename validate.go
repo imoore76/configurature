@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/fatih/structtag"
@@ -119,7 +120,7 @@ func validateRegex(fl validator.FieldLevel) bool {
 }
 
 // validate configuration
-func (c *configurer) validate(s interface{}, fs *pflag.FlagSet) {
+func (c *configurer) validate(s any, fs *pflag.FlagSet) {
 
 	v := getDefaultValidator()
 	trans := getValidatorTranslator(v)
@@ -135,13 +136,28 @@ func (c *configurer) validate(s interface{}, fs *pflag.FlagSet) {
 		if val, err := tags.Get("enum"); err == nil && val.Value() != "" {
 			enums := strings.Split(val.Value(), ",")
 			v := fs.Lookup(fName).Value.String()
-			for _, e := range enums {
-				if v == e {
-					return false // false == don't stop looping over fields
-				}
+			if slices.Contains(enums, v) {
+				return false // false == don't stop looping over fields
 			}
 			errors = append(errors, fmt.Sprintf("%s must be one of %s", fName, strings.Join(enums, ", ")))
 		}
+
+		// Check required fields that don't have a default
+		if c.opts.RequireNoDefaults {
+
+			// Don't validate here if it is already tagged as required. It will be validated
+			// below along with the entire configuration struct
+			if val, err := tags.Get("validate"); err != nil || (!val.HasOption("required") && val.Name != "required") {
+				if _, err = tags.Get("default"); err != nil {
+					v := fs.Lookup(fName)
+					if !v.Changed {
+						requiredError, _ := trans.T("required", fName)
+						errors = append(errors, requiredError)
+					}
+				}
+			}
+		}
+
 		return false // false == don't stop looping over fields
 	}, []string{})
 

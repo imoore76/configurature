@@ -952,3 +952,25 @@ func TestValidation_Ptrs(t *testing.T) {
 	}()
 	assert.Equal(t, "", err)
 }
+
+func TestValidation_RequireNoDefaults(t *testing.T) {
+	type T struct {
+		MyStringReq     string `validate:"required"`
+		MyStringNotReq  string
+		MyStringDefault string `default:"foo"`
+	}
+	err := ""
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				err = r.(string)
+			}
+		}()
+		co.Configure[T](&co.Options{
+			NoRecover:         true,
+			RequireNoDefaults: true,
+		})
+	}()
+	assert.Equal(t, "validation failed; my_string_not_req is required, my_string_req is required", err)
+
+}
