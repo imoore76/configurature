@@ -6,7 +6,8 @@
 
 Configurature is a Go library that provides declarative app configuration using structs.
 It is designed with sensible default behavior while allowing for fine-grained
-configuration if desired.
+configuration if desired. Born from the desire to simply specify a config struct without
+having to worry about specifying *every*, *single* field's environment variable and command line flag.
 
 Configuration values can be specified (in value precedence order) on the command line,
 using environment variables, and/or in a config file (yaml or json).
@@ -16,9 +17,65 @@ need to be aware of the structure of other packages' configurations in order to 
 
 See the complete documentation at [http://configurature-docs.readthedocs.io](http://configurature-docs.readthedocs.io).
 
-## Usage
+## Basic Usage
 
 Basic usage consists of defining your configuration structs and running `configurature.Configure()`.
+
+```go
+package main
+
+import (
+	"fmt"
+	"net"
+	"time"
+
+	co "github.com/imoore76/configurature"
+)
+
+type Config struct {
+	WaitTimeout time.Duration `default:"30s"`
+	ListenIP    net.IP        `default:"127.0.0.1"`
+	ListenPort  int           `default:"8080"`
+	ServerName  string
+}
+
+func main() {
+
+	conf := co.Configure[Config](&co.Options{
+		EnvPrefix: "MYAPP_",
+	})
+
+	fmt.Printf("Wait Timeout: %s\n", conf.WaitTimeout)
+	fmt.Printf("IP: %s\n", conf.ListenIP)
+	fmt.Printf("Port: %d\n", conf.ListenPort)
+	fmt.Printf("Server name: %s\n", conf.ServerName)
+
+}
+```
+You get CLI args and environment variable support without having to tediously
+specify them.
+
+```shell
+user@host $ MYAPP_LISTEN_IP=0.0.0.0 myapp --listen_port 6000
+Wait Timeout: 30s
+IP: 0.0.0.0
+Port: 6000
+Server name: 
+```
+
+Running this app with `--help` displays the app usage:
+
+```shell
+Command usage:
+  -h, --help                    show help and exit
+      --listen_ip ip            listen ip (default 127.0.0.1)
+      --listen_port int         listen port (default 8080)
+      --server_name string      server name
+      --wait_timeout duration   wait timeout (default 30s)
+```
+
+
+## Complex Usage
 
 ```go
 package main
