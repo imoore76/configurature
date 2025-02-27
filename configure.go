@@ -33,7 +33,7 @@ var configFileType = reflect.TypeFor[ConfigFile]()
 
 // configurer is used to populate a config struct
 type configurer struct {
-	config     interface{}
+	config     any
 	opts       *Options
 	configFile struct {
 		Flag  string
@@ -51,6 +51,7 @@ type Options struct {
 	NoRecover         bool                 // Don't recover from panic
 	ShowInternalFlags bool                 // Show hidden internal flags
 	NoShortHelp       bool                 // Don't add "h" as a short help flag
+	RequireNoDefaults bool                 // Require any fields that don't have a default value
 }
 
 // Configure will populate the supplied struct with options specified on the
@@ -139,7 +140,7 @@ func Configure[T any](opts *Options) *T {
 }
 
 // setFromEnv sets configuration values from environment
-func (c *configurer) setFromEnv(s interface{}, fs *pflag.FlagSet) {
+func (c *configurer) setFromEnv(s any, fs *pflag.FlagSet) {
 
 	c.visitFields(s, func(f reflect.StructField, tags *structtag.Tags, v reflect.Value, ancestors []string) (stop bool) {
 		fName := fieldNameToConfigName(f.Name, tags, ancestors)
@@ -157,7 +158,7 @@ func (c *configurer) setFromEnv(s interface{}, fs *pflag.FlagSet) {
 
 // loadFlags() sets field values based on options specified on the command line
 // or by environment variables
-func (c *configurer) loadFlags(s interface{}, fl *pflag.FlagSet) []func() {
+func (c *configurer) loadFlags(s any, fl *pflag.FlagSet) []func() {
 
 	setters := []func(){}
 
@@ -223,7 +224,7 @@ func (c *configurer) loadFlags(s interface{}, fl *pflag.FlagSet) []func() {
 
 // visitFields visits the fields of the config struct and calls the
 // provided function on each field.
-func (c *configurer) visitFields(s interface{}, f func(reflect.StructField, *structtag.Tags, reflect.Value, []string) bool, ancestors []string) bool {
+func (c *configurer) visitFields(s any, f func(reflect.StructField, *structtag.Tags, reflect.Value, []string) bool, ancestors []string) bool {
 	v := reflect.ValueOf(s).Elem()
 	t := v.Type()
 

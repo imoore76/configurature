@@ -107,7 +107,7 @@ func (m *mapValueType[T]) Type() string {
 	return m.typeName
 }
 
-func (m *mapValueType[T]) Interface() interface{} {
+func (m *mapValueType[T]) Interface() any {
 	if m.value == "" {
 		return nil
 	}
