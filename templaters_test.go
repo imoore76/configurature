@@ -24,35 +24,35 @@ import (
 )
 
 type LowerConf struct {
-	Ages map[string]int `desc:"Names and ages map" default:"a=1,b=2,c=3"`
+	Ages map[string]int `help:"Names and ages map" default:"a=1,b=2,c=3"`
 }
 type SubConf1 struct {
-	IP    net.IP `desc:"IP address on which to listen" default:"127.0.0.1"`
+	IP    net.IP `help:"IP address on which to listen" default:"127.0.0.1"`
 	Lower LowerConf
 }
 
 type SubConf2 struct {
-	IPs *[]net.IP `desc:"IP addresses" default:"127.0.0.1" name:"ips"`
+	IPs *[]net.IP `help:"IP addresses" default:"127.0.0.1" name:"ips"`
 }
 
 type YamlConf struct {
-	Conf  co.ConfigFile `desc:"configuration file" short:"c"`
-	Str   string        `desc:"a string" default:"yes\"no"`
-	Strs  []string      `desc:"a string slice" default:"1,2,3"`
-	StPtr *string       `desc:"a string pointer"`
-	Int1  int           `desc:"an int" default:"1"`
-	Int2  int           `desc:"an int"`
+	Conf  co.ConfigFile `help:"configuration file" short:"c"`
+	Str   string        `help:"a string" default:"yes\"no"`
+	Strs  []string      `help:"a string slice" default:"1,2,3"`
+	StPtr *string       `help:"a string pointer"`
+	Int1  int           `help:"an int" default:"1"`
+	Int2  int           `help:"an int"`
 	Sub   SubConf1
 	Sub2  SubConf2 `name:""`
 }
 
 func TestPrintEnvTemplate(t *testing.T) {
 	type EnvConf struct {
-		Str   string   `desc:"a string" default:"yes\"no"`
-		Strs  []string `desc:"a string slice" default:"1,2,3"`
-		StPtr *string  `desc:"a string pointer"`
-		Int1  int      `desc:"an int" default:"1"`
-		Int2  int      `desc:"an int"`
+		Str   string   `help:"a string" default:"yes\"no"`
+		Strs  []string `help:"a string slice" default:"1,2,3"`
+		StPtr *string  `help:"a string pointer"`
+		Int1  int      `help:"an int" default:"1"`
+		Int2  int      `help:"an int"`
 	}
 
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {

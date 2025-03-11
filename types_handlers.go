@@ -108,7 +108,7 @@ func AddType[structFieldType any]() {
 // of that type to the FlagSet
 func addToCustomFlagMap[structFieldType any, valueType any]() {
 	rt := reflect.TypeFor[valueType]()
-	customFlagMap[rt] = func(name string, short string, def string, desc string, fs *pflag.FlagSet) {
+	customFlagMap[rt] = func(name string, short string, def string, help string, fs *pflag.FlagSet) {
 		l := new(structFieldType)
 		if def != "" {
 			// Use Set() to set the default value of the Value
@@ -125,7 +125,7 @@ func addToCustomFlagMap[structFieldType any, valueType any]() {
 				reflect.ValueOf(l),
 				reflect.ValueOf(name),
 				reflect.ValueOf(short),
-				reflect.ValueOf(desc),
+				reflect.ValueOf(help),
 			},
 		)
 	}
@@ -140,8 +140,8 @@ func addToCustomFlagMap[structFieldType any, valueType any]() {
 // - name: the name of the flag
 // - short: the short name of the flag
 // - def: the default value of the flag
-// - desc: the description of the flag
-func addToFlagSet(t reflect.Type, enumProvided bool, fs *pflag.FlagSet, name string, short string, def string, desc string) {
+// - help: the description of the flag
+func addToFlagSet(t reflect.Type, enumProvided bool, fs *pflag.FlagSet, name string, short string, def string, help string) {
 
 	isPtr := t.Elem().Kind() == reflect.Ptr
 	if isPtr {
@@ -156,11 +156,11 @@ func addToFlagSet(t reflect.Type, enumProvided bool, fs *pflag.FlagSet, name str
 		// If this is a map value type, add its values to the description
 		if !enumProvided {
 			if vals := getMapValueTypeValues(t.Elem().String()); vals != nil {
-				desc += " (" + strings.Join(*vals, "|") + ")"
+				help += " (" + strings.Join(*vals, "|") + ")"
 			}
 		}
 
-		fn(name, short, def, desc, fs)
+		fn(name, short, def, help, fs)
 
 	} else if method, ok := pfgFlagMap[t.Elem()]; ok {
 		// Check for a pflag method in pfgFlagMap
@@ -187,7 +187,7 @@ func addToFlagSet(t reflect.Type, enumProvided bool, fs *pflag.FlagSet, name str
 
 		// Call the flag method on the actual flagset
 		m.Call([]reflect.Value{
-			reflect.ValueOf(name), reflect.ValueOf(short), defVal.Elem(), reflect.ValueOf(desc)},
+			reflect.ValueOf(name), reflect.ValueOf(short), defVal.Elem(), reflect.ValueOf(help)},
 		)
 
 	} else {

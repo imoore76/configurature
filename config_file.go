@@ -27,7 +27,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/fatih/structtag"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
@@ -36,7 +35,7 @@ import (
 // setConfigFile checks for a field of type File in the config struct and sets
 // the configFile.Value pointer to its address
 func (c *configurer) setConfigFile() {
-	c.visitFields(c.config, func(f reflect.StructField, _ *structtag.Tags, v reflect.Value, _ []string) (stop bool) {
+	c.visitFields(c.config, func(f reflect.StructField, _ *reflect.StructTag, v reflect.Value, _ []string) (stop bool) {
 		if v.Elem().Type() == configFileType {
 			if c.configFile.Value != nil {
 				panic("ConfigFile already set to " + *c.configFile.Value)

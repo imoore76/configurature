@@ -32,44 +32,44 @@ import (
 )
 
 type SubConfig struct {
-	StateFile           string        `desc:"File in which to store lock state" short:"s"`
-	DefaultLockTimeout  time.Duration `desc:"Lock timeout to use when loading locks from state file on startup" default:"10m" short:"d"`
-	NoClearOnDisconnect bool          `desc:"Do not clear locks on client disconnect" default:"false" short:"c"`
-	ReqInt              int           `desc:"Required int"`
-	FooSeconds          uint          `desc:"Something" default:"10" short:"f"`
-	FooInt              uint32        `desc:"Something" default:"100" short:"o"`
-	FooInts             []uint        `desc:"Something list of ints" default:"100,200,30"`
+	StateFile           string        `help:"File in which to store lock state" short:"s"`
+	DefaultLockTimeout  time.Duration `help:"Lock timeout to use when loading locks from state file on startup" default:"10m" short:"d"`
+	NoClearOnDisconnect bool          `help:"Do not clear locks on client disconnect" default:"false" short:"c"`
+	ReqInt              int           `help:"Required int"`
+	FooSeconds          uint          `help:"Something" default:"10" short:"f"`
+	FooInt              uint32        `help:"Something" default:"100" short:"o"`
+	FooInts             []uint        `help:"Something list of ints" default:"100,200,30"`
 }
 
 type OtherSubConfig struct {
-	SubFooString string `desc:"Something" default:"here"`
+	SubFooString string `help:"Something" default:"here"`
 }
 
 type TestConfig struct {
 	SubConfig
-	IgnoredField      string        `ignore:""`
-	Bool              bool          `desc:"Bool thing" default:"false"`
-	KeepaliveInterval time.Duration `desc:"Interval at which to send keepalive pings to client" default:"60s" short:"k"`
-	KeepaliveTimeout  time.Duration `desc:"Wait this duration for the ping ack before assuming the connection is dead" default:"5s" short:"t"`
-	LockGcInterval    time.Duration `desc:"Interval at which to garbage collect unused locks." default:"30m" short:"g"`
 	OtherSubConfig
-	LockGcMinIdle time.Duration `desc:"Minimum time a lock has to be idle (no unlocks or locks) before being considered for garbage collection" default:"5m" short:"m"`
-	ListenAddress string        `desc:"Address (host:port) at which to listen" default:"localhost:3144" short:"l"`
-	LogLevel      slog.Level    `desc:"Log level" default:"info" short:"v"`
+	IgnoredField      string        `ignore:""`
+	Bool              bool          `help:"Bool thing" default:"false"`
+	KeepaliveInterval time.Duration `help:"Interval at which to send keepalive pings to client" default:"60s" short:"k"`
+	KeepaliveTimeout  time.Duration `help:"Wait this duration for the ping ack before assuming the connection is dead" default:"5s" short:"t"`
+	LockGcInterval    time.Duration `help:"Interval at which to garbage collect unused locks." default:"30m" short:"g"`
+	LockGcMinIdle     time.Duration `help:"Minimum time a lock has to be idle (no unlocks or locks) before being considered for garbage collection" default:"5m" short:"m"`
+	ListenAddress     string        `help:"Address (host:port) at which to listen" default:"localhost:3144" short:"l"`
+	LogLevel          slog.Level    `help:"Log level" default:"info" short:"v"`
 }
 
 type TestConfigFileStruct struct {
-	CoolFile co.ConfigFile `desc:"Configuration file"`
+	CoolFile co.ConfigFile `help:"Configuration file"`
 	TestConfig
 }
 
 type TestNestedConfig struct {
-	CoolFile   co.ConfigFile     `desc:"Configuration file"`
-	SSlice     []string          `desc:"Slice of strings" default:"a,b,c"`
-	MyMap      map[string]string `desc:"Map of strings"`
-	NameAgeMap map[string]int    `desc:"Map of ages"`
-	HiddenFlag string            `desc:"hidden flag" default:"hidden" hidden:"true"`
-	MyEnum     string            `desc:"My enum" enum:"a,b,c" default:"a"`
+	CoolFile   co.ConfigFile     `help:"Configuration file"`
+	SSlice     []string          `help:"Slice of strings" default:"a,b,c"`
+	MyMap      map[string]string `help:"Map of strings"`
+	NameAgeMap map[string]int    `help:"Map of ages"`
+	HiddenFlag string            `help:"hidden flag" default:"hidden" hidden:"true"`
+	MyEnum     string            `help:"My enum" enum:"a,b,c" default:"a"`
 	OS         OtherSubConfig
 	Sub        SubConfig
 }
@@ -564,13 +564,13 @@ func TestSubConfig_GivenNameEnv(t *testing.T) {
 
 func TestNilPtrs_True(t *testing.T) {
 	type TConf struct {
-		PString     *string     `desc:"Pointer to string"`
-		PLogLevel   *slog.Level `desc:"Pointer to log level" default:"debug"`
-		PInt        *int        `desc:"Pointer to int"`
-		PInts       *[]int      `desc:"Pointer to int slice"`
-		PIntsDef    *[]int      `desc:"Pointer to int slice" default:"1,3,4"`
-		PStrings    *[]string   `desc:"Pointer to string slice"`
-		PStringsDef *[]string   `desc:"Pointer to string slice" default:"a,b,c"`
+		PString     *string     `help:"Pointer to string"`
+		PLogLevel   *slog.Level `help:"Pointer to log level" default:"debug"`
+		PInt        *int        `help:"Pointer to int"`
+		PInts       *[]int      `help:"Pointer to int slice"`
+		PIntsDef    *[]int      `help:"Pointer to int slice" default:"1,3,4"`
+		PStrings    *[]string   `help:"Pointer to string slice"`
+		PStringsDef *[]string   `help:"Pointer to string slice" default:"a,b,c"`
 	}
 
 	var conf *TConf
@@ -603,14 +603,14 @@ func TestNilPtrs_True(t *testing.T) {
 
 func TestNilPtrs_False(t *testing.T) {
 	type TConf struct {
-		PString     *string     `desc:"Pointer to string"`
-		PLogLevel   *slog.Level `desc:"Pointer to log level" default:"debug"`
-		PInt        *int        `desc:"Pointer to int"`
-		PString2    *string     `desc:"Pointer to another string"`
-		PInts       *[]int      `desc:"Pointer to int slice"`
-		PIntsDef    *[]int      `desc:"Pointer to int slice" default:"1,3,4"`
-		PStrings    *[]string   `desc:"Pointer to string slice"`
-		PStringsDef *[]string   `desc:"Pointer to string slice" default:"a,b,c"`
+		PString     *string     `help:"Pointer to string"`
+		PLogLevel   *slog.Level `help:"Pointer to log level" default:"debug"`
+		PInt        *int        `help:"Pointer to int"`
+		PString2    *string     `help:"Pointer to another string"`
+		PInts       *[]int      `help:"Pointer to int slice"`
+		PIntsDef    *[]int      `help:"Pointer to int slice" default:"1,3,4"`
+		PStrings    *[]string   `help:"Pointer to string slice"`
+		PStringsDef *[]string   `help:"Pointer to string slice" default:"a,b,c"`
 	}
 
 	var conf *TConf
