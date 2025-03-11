@@ -42,7 +42,7 @@ func AddMapValueType[T any](typeName string, keys []string, values []T) {
 
 	mapValueTypeKeys[reflect.TypeFor[T]().String()] = keys
 
-	customFlagMap[reflect.TypeFor[T]()] = func(name string, short string, def string, desc string, fs *pflag.FlagSet) {
+	customFlagMap[reflect.TypeFor[T]()] = func(name string, short string, def string, help string, fs *pflag.FlagSet) {
 		l := &mapValueType[T]{
 			mapping:  nm,
 			typeName: typeName,
@@ -59,7 +59,7 @@ func AddMapValueType[T any](typeName string, keys []string, values []T) {
 				reflect.ValueOf(l),
 				reflect.ValueOf(name),
 				reflect.ValueOf(short),
-				reflect.ValueOf(desc),
+				reflect.ValueOf(help),
 			},
 		)
 	}

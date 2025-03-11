@@ -30,13 +30,13 @@ tasks:
 
 # App tasks
   print_types: 
-    desc: "Print supported types for pasting into docs"
+    help: "Print supported types for pasting into docs"
     aliases: ["types", "pt"]
     cmds:
       - go test -timeout 30s -run '^TestGetSupportedTypes$' -v -args -print_types | grep type= | awk -F= '{ print "  * `" $NF "`" }' | sort
       
   test:
-    desc: "Run unit tests"
+    help: "Run unit tests"
     aliases: ["t"]
     sources:
       - "*.go"
@@ -44,13 +44,13 @@ tasks:
       - go test -timeout 30s {{.CLI_ARGS}} ./...
       
   clean:
-    desc: "Clean up the build artifacts and cache"
+    help: "Clean up the build artifacts and cache"
     cmds:
       - go clean -cache -testcache
 
 # Common tasks
   check:
-    desc: "Run pre-build checks on files"
+    help: "Run pre-build checks on files"
     aliases: ["c", "checks"]
     cmds:
       - task: clean
@@ -64,14 +64,14 @@ tasks:
       - find . -path "./.venv" -prune -o -type f -not -name "*.sh" -exec chmod a-x {} \;
 
   test-clean:
-    desc: "Clean test cache and run tests"
+    help: "Clean test cache and run tests"
     aliases: ["tc"]
     cmds:
       - task: clean
       - task: test
 
   lint:
-    desc: "Run linters"
+    help: "Run linters"
     sources:
       - "**/*.go"
     cmds:
@@ -81,7 +81,7 @@ tasks:
       - gocyclo -over 14 -ignore "\\.pb\\.go$" ./.
 
   fmt:
-    desc: "Format the code"
+    help: "Format the code"
     sources:
       - "**/*.go"
     cmds:
@@ -120,7 +120,7 @@ tasks:
         merchantability, or fitness for a particular purpose.\n
 
   required_files:
-    desc: "Make sure required files exist"
+    help: "Make sure required files exist"
     aliases: ["rf"]
     cmds:
       - task: license
@@ -129,12 +129,12 @@ tasks:
       - task: readme
 
   license_headers:
-    desc: "Make sure source files have headers"
+    help: "Make sure source files have headers"
     cmds:
       - addlicense -check -ignore '**/.*' -ignore '.*/**' -ignore 'docs/build/**' ./
 
   add_license_headers:
-    desc: "Make sure source files have headers"
+    help: "Make sure source files have headers"
     aliases: ["alh"]
     preconditions:
       - test "{{.CLI_ARGS}}" != ""
@@ -142,7 +142,7 @@ tasks:
       - addlicense -ignore '**/.*' -ignore '.*/**' ./ {{.CLI_ARGS}}
 
   check_readme_google:
-    desc: "Make sure README.md has common items"
+    help: "Make sure README.md has common items"
     sources:
       - "README.md"
     cmds:
@@ -151,14 +151,14 @@ tasks:
       - pcre2grep -M -q '# License\s*Apache 2.0.' README.md
 
   googlify:
-    desc: "Make sure google checks pass"
+    help: "Make sure google checks pass"
     cmds:
       - task: required_files
       - task: check_readme_google
       - task: license_headers 
 
   gitignore:
-    desc: "Make sure .gitignore contains common items"
+    help: "Make sure .gitignore contains common items"
     status:
       - test -f ./.gitignore
       - grep -E -q '^\.\*$' .gitignore

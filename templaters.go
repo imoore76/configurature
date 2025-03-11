@@ -19,7 +19,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/fatih/structtag"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
@@ -59,7 +58,7 @@ func (c *configurer) printYamlTemplate(fs *pflag.FlagSet) {
 	fmt.Printf("# Generated with\n# %s\n\n", c.opts.Args)
 
 	ancestorsSeen := map[string]bool{}
-	c.visitFields(c.config, func(f reflect.StructField, tags *structtag.Tags, v reflect.Value, ancestors []string) (stop bool) {
+	c.visitFields(c.config, func(f reflect.StructField, tags *reflect.StructTag, v reflect.Value, ancestors []string) (stop bool) {
 		if v.Elem().Type() == configFileType {
 			return
 		}

@@ -23,7 +23,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/fatih/structtag"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/pflag"
 )
@@ -142,7 +141,7 @@ func Configure[T any](opts *Options) *T {
 // setFromEnv sets configuration values from environment
 func (c *configurer) setFromEnv(s any, fs *pflag.FlagSet) {
 
-	c.visitFields(s, func(f reflect.StructField, tags *structtag.Tags, v reflect.Value, ancestors []string) (stop bool) {
+	c.visitFields(s, func(f reflect.StructField, tags *reflect.StructTag, v reflect.Value, ancestors []string) (stop bool) {
 		fName := fieldNameToConfigName(f.Name, tags, ancestors)
 		envVal := os.Getenv(
 			fmt.Sprintf("%s%s", c.opts.EnvPrefix, strcase.ToScreamingSnake(fName)),
@@ -162,45 +161,32 @@ func (c *configurer) loadFlags(s any, fl *pflag.FlagSet) []func() {
 
 	setters := []func(){}
 
-	c.visitFields(s, func(f reflect.StructField, tags *structtag.Tags, v reflect.Value, ancestors []string) (stop bool) {
+	c.visitFields(s, func(f reflect.StructField, tags *reflect.StructTag, v reflect.Value, ancestors []string) (stop bool) {
 
 		fName := fieldNameToConfigName(f.Name, tags, ancestors)
-		descTag, err := tags.Get("desc")
-		if err != nil {
-			descTag = &structtag.Tag{
-				Key: "desc",
-				Name: strings.ReplaceAll(
-					fieldNameToConfigName(f.Name, tags, ancestors), "_", " ",
-				),
-			}
+		helpTag, ok := tags.Lookup("help")
+		if !ok {
+			helpTag = strings.ReplaceAll(fieldNameToConfigName(f.Name, tags, ancestors), "_", " ")
 		}
-		shortTag, _ := tags.Get("short")
-		if shortTag == nil {
-			shortTag = &structtag.Tag{}
-		}
-		noDefault := false
-		defaultTag, _ := tags.Get("default")
-		if defaultTag == nil {
-			noDefault = true
-			defaultTag = &structtag.Tag{}
-		}
+		shortTag := tags.Get("short")
+		defaultTag, ok := tags.Lookup("default")
+		noDefault := !ok
 
 		// Special case for ConfigFile field
 		if v.Elem().Type() == configFileType {
 			c.configFile.Flag = fName
-			c.configFile.Short = shortTag.Value()
+			c.configFile.Short = shortTag
 		}
 
-		desc := descTag.Value()
 		enumProvided := false
-		if enums, _ := tags.Get("enum"); enums != nil && enums.Value() != "" {
-			desc += fmt.Sprintf(" (%s)", strings.Replace(enums.Value(), ",", "|", -1))
+		if enums := tags.Get("enum"); enums != "" {
+			helpTag += fmt.Sprintf(" (%s)", strings.Replace(enums, ",", "|", -1))
 			enumProvided = true
 		}
-		addToFlagSet(v.Type(), enumProvided, fl, fName, shortTag.Value(), defaultTag.Value(), desc)
+		addToFlagSet(v.Type(), enumProvided, fl, fName, shortTag, defaultTag, helpTag)
 
 		// Hide hidden flags
-		if _, err := tags.Get("hidden"); err == nil {
+		if _, ok := tags.Lookup("hidden"); ok {
 			fl.MarkHidden(fName)
 		}
 
@@ -224,7 +210,7 @@ func (c *configurer) loadFlags(s any, fl *pflag.FlagSet) []func() {
 
 // visitFields visits the fields of the config struct and calls the
 // provided function on each field.
-func (c *configurer) visitFields(s any, f func(reflect.StructField, *structtag.Tags, reflect.Value, []string) bool, ancestors []string) bool {
+func (c *configurer) visitFields(s any, f func(reflect.StructField, *reflect.StructTag, reflect.Value, []string) bool, ancestors []string) bool {
 	v := reflect.ValueOf(s).Elem()
 	t := v.Type()
 
@@ -235,13 +221,10 @@ func (c *configurer) visitFields(s any, f func(reflect.StructField, *structtag.T
 		}
 
 		// Parse tags
-		tags, err := structtag.Parse(string(t.Field(i).Tag))
-		if err != nil {
-			panic(fmt.Sprintf("error parsing field %s tags: %s", t.Field(i).Name, err.Error()))
-		}
+		tags := t.Field(i).Tag
 
 		// Skip any fields tagged with ignore:""
-		if _, err := tags.Get("ignore"); err == nil {
+		if _, ok := tags.Lookup("ignore"); ok {
 			continue
 		}
 
@@ -258,8 +241,8 @@ func (c *configurer) visitFields(s any, f func(reflect.StructField, *structtag.T
 		if t.Field(i).Type.Kind() == reflect.Struct {
 			fld := v.Field(i).Addr().Interface()
 			fName := t.Field(i).Name
-			if name, err := tags.Get("name"); err == nil {
-				fName = name.Value()
+			if name, ok := tags.Lookup("name"); ok {
+				fName = name
 			}
 
 			var newAncestors []string
@@ -275,7 +258,7 @@ func (c *configurer) visitFields(s any, f func(reflect.StructField, *structtag.T
 		}
 
 		// Call function on field and stop if it returns true
-		if f(t.Field(i), tags, v.Field(i).Addr(), ancestors) {
+		if f(t.Field(i), &tags, v.Field(i).Addr(), ancestors) {
 			return true
 		}
 	}
@@ -284,9 +267,9 @@ func (c *configurer) visitFields(s any, f func(reflect.StructField, *structtag.T
 
 // fieldNameToConfigName converts a struct field name and its ancestor path to
 // its flag name
-func fieldNameToConfigName(name string, tags *structtag.Tags, ancestors []string) string {
-	if nm, err := tags.Get("name"); err == nil && nm.Value() != "" {
-		name = nm.Value()
+func fieldNameToConfigName(name string, tags *reflect.StructTag, ancestors []string) string {
+	if nm, ok := tags.Lookup("name"); ok && nm != "" {
+		name = nm
 	}
 	return strings.Join(append(ancestors, strcase.ToSnake(name)), "_")
 }

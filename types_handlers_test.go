@@ -62,10 +62,10 @@ func (i *ImageFile) Interface() any {
 }
 
 type MyConfig struct {
-	StateFile string        `desc:"File in which to store lock state" short:"s"`
-	Image     ImageFile     `desc:"Path to an image"`
-	Images    []ImageFile   `desc:"Paths to images"`
-	Conf      co.ConfigFile `desc:"Configuration file"`
+	StateFile string        `help:"File in which to store lock state" short:"s"`
+	Image     ImageFile     `help:"Path to an image"`
+	Images    []ImageFile   `help:"Paths to images"`
+	Conf      co.ConfigFile `help:"Configuration file"`
 }
 
 func addImageFileTypes() {
@@ -236,7 +236,7 @@ func TestMapValueType(t *testing.T) {
 	)
 
 	type CConf struct {
-		Background Color `desc:"background color" default:"red"`
+		Background Color `help:"background color" default:"red"`
 	}
 
 	conf := co.Configure[CConf](&co.Options{
@@ -256,7 +256,7 @@ func TestMapValueType_NoValue(t *testing.T) {
 	)
 
 	type CConf struct {
-		Background Color `desc:"background color"`
+		Background Color `help:"background color"`
 	}
 
 	conf := co.Configure[CConf](&co.Options{})
@@ -273,7 +273,7 @@ func TestMapValueType_BadValue(t *testing.T) {
 	)
 
 	type CConf struct {
-		Background Color `desc:"background color"`
+		Background Color `help:"background color"`
 	}
 
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
@@ -302,7 +302,7 @@ func TestMapValueType_Usage(t *testing.T) {
 	)
 
 	type MVT struct {
-		Background Color `desc:"background color" default:"red"`
+		Background Color `help:"background color" default:"red"`
 	}
 
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {

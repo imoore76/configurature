@@ -92,7 +92,7 @@ import (
 
 // Database config struct.
 type DBConfig struct {
-	Host     string `validate:"required"`      // this field is required
+	Host     string `required:""`              // this field is required
 	Port     int    `default:"5432" short:"p"` // specify "short" flag
 	User     string `default:"postgres"`
 	Password string `default:"postgres"`
@@ -102,7 +102,7 @@ type DBConfig struct {
 type ServerConfig struct {
 	ServerName  string `name:"hostname"` // rename this field in the config
 	ReadTimeout int    // no struct tags are required
-	ListenIP    net.IP `dec:"IP address on which to listen" default:"127.0.0.1"`
+	ListenIP    net.IP `help:"IP address on which to listen" default:"127.0.0.1"`
 	ListenPort  uint   `default:"8080"`
 }
 
@@ -110,9 +110,9 @@ type Config struct {
 	ServerConfig                  // Embedded struct
 	DB              DBConfig      // Sub-config in `DB` struct
 	Theme           theme.Config  // Sub-config from "theme" package
-	CalculatedField string        `ignore:"true"`                               // ignore this field
+	CalculatedField string        `ignore:""`                                   // ignore this field
 	LogLevel        string        `default:"info" enum:"debug,info,warn,error"` // enum field
-	Conf            co.ConfigFile `desc:"Configuration file"`                   // config file
+	Conf            co.ConfigFile `help:"Configuration file"`                   // config file
 }
 
 func main() {
