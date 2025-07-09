@@ -29,7 +29,7 @@ import (
 func TestConfigFile(t *testing.T) {
 	assert := assert.New(t)
 
-	tmp, _ := os.CreateTemp("", "ldlm-test-*.yml")
+	tmp, _ := os.CreateTemp("", "cfgr-test-*.yml")
 	defer os.Remove(tmp.Name())
 	tmp.Write([]byte("foo_int: 4\nsub_foo_string: 'yes'\nkeepalive_timeout: 3m\nbool: true\n"))
 	tmp.Close()
@@ -46,7 +46,7 @@ func TestConfigFile(t *testing.T) {
 
 func TestConfigFile_BadField(t *testing.T) {
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
-		tmp, _ := os.CreateTemp("", "ldlm-test-*.yml")
+		tmp, _ := os.CreateTemp("", "cfgr-test-*.yml")
 		defer os.Remove(tmp.Name())
 		tmp.Write([]byte("foo_int: 4\nsub_string: 'yes'\nkeepalive_timeout: 3m\nbool: true\n"))
 		tmp.Close()
@@ -66,7 +66,7 @@ func TestConfigFile_BadField(t *testing.T) {
 
 func TestConfigFile_BadValue(t *testing.T) {
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
-		tmp, _ := os.CreateTemp("", "ldlm-test-*.yml")
+		tmp, _ := os.CreateTemp("", "cfgr-test-*.yml")
 		defer os.Remove(tmp.Name())
 		tmp.Write([]byte("foo_int: asdf\nsub_foo_string: 'ok'\nkeepalive_timeout: 3m\nbool: true\n"))
 		tmp.Close()
@@ -87,7 +87,7 @@ func TestConfigFile_BadValue(t *testing.T) {
 
 func TestConfigFile_UnsupportedType(t *testing.T) {
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
-		tmp, _ := os.CreateTemp("", "ldlm-test-*.foo")
+		tmp, _ := os.CreateTemp("", "cfgr-test-*.foo")
 		defer os.Remove(tmp.Name())
 		tmp.Write([]byte("foo_int: asdf\nsub_foo_string: 'ok'\nkeepalive_timeout: 3m\nbool: true\n"))
 		tmp.Close()
@@ -109,7 +109,7 @@ func TestConfigFile_UnsupportedType(t *testing.T) {
 func TestNested_Yaml(t *testing.T) {
 	assert := assert.New(t)
 
-	tmp, _ := os.CreateTemp("", "ldlm-test-*.yml")
+	tmp, _ := os.CreateTemp("", "cfgr-test-*.yml")
 	defer os.Remove(tmp.Name())
 	tmp.Write([]byte(`s_slice: [af, 'as"oidjf', 3]
 my_map:
@@ -150,7 +150,7 @@ os:
 func TestNested_JSON(t *testing.T) {
 	assert := assert.New(t)
 
-	tmp, _ := os.CreateTemp("", "ldlm-test-*.json")
+	tmp, _ := os.CreateTemp("", "cfgr-test-*.json")
 	defer os.Remove(tmp.Name())
 	tmp.Write([]byte(`{"s_slice": ["af", "asoidjf", "3"], "my_map": {"foo": "bar", "baz": "qux"}, "sub": {"default_lock_timeout": "30s", "foo_seconds": 20, "foo_int": 2, "foo_ints": [2, 4, 5]}, "os": {"sub_foo_string": "there and everywhere"}}`))
 	tmp.Close()

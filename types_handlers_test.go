@@ -79,7 +79,7 @@ func TestRegisterCustomType(t *testing.T) {
 
 func TestCustomType_Flag(t *testing.T) {
 	addImageFileTypes()
-	tmp, _ := os.CreateTemp("", "ldlm-test-*.png")
+	tmp, _ := os.CreateTemp("", "cfgr-test-*.png")
 	tmp.Close()
 	defer os.Remove(tmp.Name())
 
@@ -97,17 +97,18 @@ func TestCustomType_Error(t *testing.T) {
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
 
 		co.Configure[MyConfig](&co.Options{
-			Args:  []string{"--image", "./go.mod"},
+			Args:  []string{"--image", os.Getenv("TEST_TEMP_FILE_NAME")},
 			Usage: func(_ *flag.FlagSet) {},
 		})
 		os.Exit(0)
 	}
 
+	fileName := tmpFile(t, "mod")
 	stdout, stderr := runExternal(t)
 	assert := assert.New(t)
-	assert.Equal(`invalid argument "./go.mod" for "--image" flag: file type `+
+	assert.Equal(`invalid argument "`+fileName+`" for "--image" flag: file type `+
 		`".mod" not supported`+"\n", stdout)
-	assert.Equal(`invalid argument "./go.mod" for "--image" flag: file type `+
+	assert.Equal(`invalid argument "`+fileName+`" for "--image" flag: file type `+
 		`".mod" not supported`+"\n", stderr)
 
 }
@@ -115,9 +116,10 @@ func TestCustomType_Error(t *testing.T) {
 func TestCustomType_ErrorConfigFile(t *testing.T) {
 	addImageFileTypes()
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
-		tmp, _ := os.CreateTemp("", "ldlm-test-*.yml")
+		tmp, _ := os.CreateTemp("", "cfgr-test-*.yml")
 		defer os.Remove(tmp.Name())
-		tmp.Write([]byte("image: ./go.mod\n"))
+		fileName := tmpFile(t, "mod")
+		tmp.Write([]byte("image: " + fileName + "\n"))
 		tmp.Close()
 
 		co.Configure[MyConfig](&co.Options{
@@ -141,7 +143,7 @@ func TestCustomSliceType_Flag(t *testing.T) {
 	files := make([]string, 3)
 	expected := make([]ImageFile, 3)
 	for idx := range 3 {
-		tmp, _ := os.CreateTemp("", "ldlm-test-*.png")
+		tmp, _ := os.CreateTemp("", "cfgr-test-*.png")
 		tmp.Close()
 		defer os.Remove(tmp.Name())
 
@@ -163,17 +165,18 @@ func TestCustomSliceType_Error(t *testing.T) {
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
 
 		co.Configure[MyConfig](&co.Options{
-			Args:  []string{"--images", "./go.mod"},
+			Args:  []string{"--images", os.Getenv("TEST_TEMP_FILE_NAME")},
 			Usage: func(_ *flag.FlagSet) {},
 		})
 		os.Exit(0)
 	}
 
+	fileName := tmpFile(t, "mod")
 	stdout, stderr := runExternal(t)
 	assert := assert.New(t)
-	assert.Equal(`invalid argument "./go.mod" for "--images" flag: file type `+
+	assert.Equal(`invalid argument "`+fileName+`" for "--images" flag: file type `+
 		`".mod" not supported`+"\n", stdout)
-	assert.Equal(`invalid argument "./go.mod" for "--images" flag: file type `+
+	assert.Equal(`invalid argument "`+fileName+`" for "--images" flag: file type `+
 		`".mod" not supported`+"\n", stderr)
 
 }
@@ -183,7 +186,7 @@ func TestCustomSliceType_ConfigFile(t *testing.T) {
 	files := make([]string, 3)
 	expected := make([]ImageFile, 3)
 	for idx := range 3 {
-		tmp, _ := os.CreateTemp("", "ldlm-test-config-file*.png")
+		tmp, _ := os.CreateTemp("", "cfgr-test-config-file*.png")
 		tmp.Close()
 		defer os.Remove(tmp.Name())
 
@@ -191,7 +194,7 @@ func TestCustomSliceType_ConfigFile(t *testing.T) {
 		expected[idx] = ImageFile(tmp.Name())
 	}
 
-	tmp, _ := os.CreateTemp("", "ldlm-test-*.yaml")
+	tmp, _ := os.CreateTemp("", "cfgr-test-*.yaml")
 	tmp.Write([]byte("images:\n  - " + strings.Join(files, "\n  - ") + "\n"))
 	tmp.Close()
 	defer os.Remove(tmp.Name())
@@ -207,9 +210,10 @@ func TestCustomSliceType_ConfigFile(t *testing.T) {
 func TestCustomSliceType_ErrorConfigFile(t *testing.T) {
 	addImageFileTypes()
 	if os.Getenv("TEST_PASSTHROUGH") == "1" {
-		tmp, _ := os.CreateTemp("", "ldlm-test-*.yml")
+		tmp, _ := os.CreateTemp("", "cfgr-test-*.yml")
 		defer os.Remove(tmp.Name())
-		tmp.Write([]byte("image: ./go.mod\n"))
+		fileName := tmpFile(t, "mod")
+		tmp.Write([]byte("image: " + fileName + "\n"))
 		tmp.Close()
 
 		co.Configure[MyConfig](&co.Options{

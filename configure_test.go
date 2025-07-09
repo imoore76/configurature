@@ -75,7 +75,7 @@ type TestNestedConfig struct {
 }
 
 func runExternal(t *testing.T) (out string, err string) {
-	cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
+	cmd := exec.Command(os.Args[0], "-test.v=false", "-test.run="+t.Name())
 	cmd.Env = append(os.Environ(), "TEST_PASSTHROUGH=1")
 	cmdout, cmderr := cmd.Output()
 	if cmdout != nil {
@@ -89,6 +89,17 @@ func runExternal(t *testing.T) (out string, err string) {
 		err = ""
 	}
 	return out, err
+}
+
+func tmpFile(t *testing.T, suffix string) string {
+	tmp, _ := os.CreateTemp("", fmt.Sprintf("cfgr-test-*.%s", suffix))
+	tmp.Close()
+	os.Setenv("TEST_TEMP_FILE_NAME", tmp.Name())
+	t.Cleanup(func() {
+		os.Remove(tmp.Name())
+		os.Unsetenv("TEST_TEMP_FILE_NAME")
+	})
+	return tmp.Name()
 }
 
 func TestDefaults(t *testing.T) {
@@ -219,7 +230,7 @@ func TestFlagOverrideEnv(t *testing.T) {
 func TestConfigFile_FromEnv(t *testing.T) {
 	assert := assert.New(t)
 
-	tmp, _ := os.CreateTemp("", "ldlm-test-*.yml")
+	tmp, _ := os.CreateTemp("", "cfgr-test-*.yml")
 	defer os.Remove(tmp.Name())
 	tmp.Write([]byte("foo_int: 4\nsub_foo_string: 'yes'\nkeepalive_timeout: 3m\nbool: true\n"))
 	tmp.Close()
@@ -244,7 +255,7 @@ func TestConfigFile_Precedence(t *testing.T) {
 	os.Setenv("TEST_CONF_FOO_INT", "7")
 	os.Setenv("TEST_CONF_SUB_FOO_STRING", "asdf")
 
-	tmp, _ := os.CreateTemp("", "ldlm-test-*.yml")
+	tmp, _ := os.CreateTemp("", "cfgr-test-*.yml")
 	defer os.Remove(tmp.Name())
 	tmp.Write([]byte("foo_int: 4\nsub_foo_string: 'yes'\nkeepalive_timeout: 3m\nbool: false\n"))
 	tmp.Close()
